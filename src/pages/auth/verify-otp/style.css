@@ -1,0 +1,47 @@
+.otp-input-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.otp-input {
+  flex: 1;
+  max-width: 85px;
+  height: 60px;
+  text-align: center;
+  font-size: 30px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  color: #122751;
+}
+
+/* Green border and shadow on focus */
+.otp-input:focus,
+.otp-input:active,
+.otp-input:hover
+ {
+  border-color: #01B763;
+    box-shadow: 0 0 0 2px rgba(1, 183, 99, 0.1) !important;
+}
+
+/* Shake animation */
+.otp-input-group.shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+
+/* Error red border */
+.otp-input.error {
+  border: 1.5px solid #ff4d4f !important;
+}
