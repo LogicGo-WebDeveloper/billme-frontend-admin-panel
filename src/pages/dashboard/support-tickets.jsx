@@ -3,10 +3,10 @@ import {
   Row,
   Col,
   Card,
-  Statistic,
+  // Statistic,
   Select,
   Table,
-  Tag,
+  // Tag,
   List,
   Input,
   Button,
@@ -20,42 +20,43 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  DollarOutlined,
+  // DollarOutlined,
   SendOutlined,
   UserOutlined,
   CustomerServiceOutlined,
 } from "@ant-design/icons";
-import { Line, Doughnut, Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+// import { Line, Doughnut, Bar } from "react-chartjs-2";
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   ArcElement,
+//   BarElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+// } from "chart.js";
 import PrimaryButton from "../../components/common/primary.button";
 import StatusBadge from "../../components/common/commonBadge";
+import CommonTable from "../../components/CommonTable";
 
 const { TextArea } = Input;
 const { Title: TypographyTitle, Text } = Typography;
 const { Option } = Select;
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   ArcElement,
+//   BarElement,
+//   Title,
+//   Tooltip,
+//   Legend
+// );
 
 const SupportTickets = () => {
   const [ticketTrendDuration, setTicketTrendDuration] = useState("monthly");
@@ -64,83 +65,83 @@ const SupportTickets = () => {
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [isTicketModalVisible, setIsTicketModalVisible] = useState(false);
 
-  const totalTickets = 250;
-  const openTickets = 80;
-  const closedTickets = 170;
-  const highPriorityTickets = 25;
+  // const totalTickets = 250;
+  // const openTickets = 80;
+  // const closedTickets = 170;
+  // const highPriorityTickets = 25;
 
-  const ticketTrendData = {
-    yearly: {
-      labels: ["2020", "2021", "2022", "2023", "2024"],
-      data: [80, 150, 180, 220, 250],
-    },
-    monthly: {
-      labels: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ],
-      data: [15, 20, 18, 25, 22, 30, 28, 35, 32, 38, 40, 45],
-    },
-    weekly: {
-      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      data: [5, 8, 7, 10, 12, 15, 10],
-    },
-    daily: {
-      labels: ["8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM"],
-      data: [1, 2, 3, 2, 4, 3, 5],
-    },
-  };
+  // const ticketTrendData = {
+  //   yearly: {
+  //     labels: ["2020", "2021", "2022", "2023", "2024"],
+  //     data: [80, 150, 180, 220, 250],
+  //   },
+  //   monthly: {
+  //     labels: [
+  //       "Jan",
+  //       "Feb",
+  //       "Mar",
+  //       "Apr",
+  //       "May",
+  //       "Jun",
+  //       "Jul",
+  //       "Aug",
+  //       "Sep",
+  //       "Oct",
+  //       "Nov",
+  //       "Dec",
+  //     ],
+  //     data: [15, 20, 18, 25, 22, 30, 28, 35, 32, 38, 40, 45],
+  //   },
+  //   weekly: {
+  //     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  //     data: [5, 8, 7, 10, 12, 15, 10],
+  //   },
+  //   daily: {
+  //     labels: ["8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM"],
+  //     data: [1, 2, 3, 2, 4, 3, 5],
+  //   },
+  // };
 
-  const chartData = {
-    labels: ticketTrendData[ticketTrendDuration].labels,
-    datasets: [
-      {
-        label: "Tickets Created",
-        data: ticketTrendData[ticketTrendDuration].data,
-        borderColor: "#01B763",
-        backgroundColor: "rgba(1, 183, 99, 0.1)",
-        tension: 0.4,
-        fill: true,
-      },
-    ],
-  };
+  // const chartData = {
+  //   labels: ticketTrendData[ticketTrendDuration].labels,
+  //   datasets: [
+  //     {
+  //       label: "Tickets Created",
+  //       data: ticketTrendData[ticketTrendDuration].data,
+  //       borderColor: "#01B763",
+  //       backgroundColor: "rgba(1, 183, 99, 0.1)",
+  //       tension: 0.4,
+  //       fill: true,
+  //     },
+  //   ],
+  // };
 
-  const chartOptions = {
-    responsive: true,
-    plugins: { legend: { position: "top" } },
-    scales: { y: { beginAtZero: true } },
-  };
+  // const chartOptions = {
+  //   responsive: true,
+  //   plugins: { legend: { position: "top" } },
+  //   scales: { y: { beginAtZero: true } },
+  // };
 
-  const ticketStatusData = {
-    labels: ["Open", "Closed", "Pending", "Resolved"],
-    datasets: [
-      {
-        data: [30, 50, 10, 10],
-        backgroundColor: ["#1890ff", "#01B763", "#faad14", "#2db7f5"],
-      },
-    ],
-  };
+  // const ticketStatusData = {
+  //   labels: ["Open", "Closed", "Pending", "Resolved"],
+  //   datasets: [
+  //     {
+  //       data: [30, 50, 10, 10],
+  //       backgroundColor: ["#1890ff", "#01B763", "#faad14", "#2db7f5"],
+  //     },
+  //   ],
+  // };
 
-  const ticketPriorityData = {
-    labels: ["High", "Medium", "Low"],
-    datasets: [
-      {
-        label: "Number of Tickets",
-        data: [25, 60, 165],
-        backgroundColor: ["#ff4d4f", "#faad14", "#1890ff"],
-      },
-    ],
-  };
+  // const ticketPriorityData = {
+  //   labels: ["High", "Medium", "Low"],
+  //   datasets: [
+  //     {
+  //       label: "Number of Tickets",
+  //       data: [25, 60, 165],
+  //       backgroundColor: ["#ff4d4f", "#faad14", "#1890ff"],
+  //     },
+  //   ],
+  // };
 
   const tickets = [
     {
@@ -181,18 +182,18 @@ const SupportTickets = () => {
           isAdmin: true,
         },
         {
-            sender: "Alice Johnson",
-            message:
-              "The error says: 'Transaction failed. Please try again later.'",
-            time: "58 minutes ago",
-            isAdmin: false,
-          },
-          {
-            sender: "Support Team A",
-            message: "Thanks. We're checking logs with our payment provider.",
-            time: "45 minutes ago",
-            isAdmin: true,
-          },
+          sender: "Alice Johnson",
+          message:
+            "The error says: 'Transaction failed. Please try again later.'",
+          time: "58 minutes ago",
+          isAdmin: false,
+        },
+        {
+          sender: "Support Team A",
+          message: "Thanks. We're checking logs with our payment provider.",
+          time: "45 minutes ago",
+          isAdmin: true,
+        },
       ],
     },
     {
@@ -333,7 +334,9 @@ const SupportTickets = () => {
           Resolved: { bgColor: "#CFFAFE", textColor: "#155E75" },
         };
         const { bgColor, textColor } = badgeMap[status] || {};
-        return <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />;
+        return (
+          <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />
+        );
       },
     },
     {
@@ -347,7 +350,13 @@ const SupportTickets = () => {
           Low: { bgColor: "#DCFCE7", textColor: "#15803D" },
         };
         const { bgColor, textColor } = badgeMap[priority] || {};
-        return <StatusBadge label={priority} bgColor={bgColor} textColor={textColor} />;
+        return (
+          <StatusBadge
+            label={priority}
+            bgColor={bgColor}
+            textColor={textColor}
+          />
+        );
       },
     },
     {
@@ -369,12 +378,12 @@ const SupportTickets = () => {
       ),
     },
   ];
-  
 
   return (
     <div style={{ padding: 24 }}>
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
+        {/* Commented out all statistics cards */}
+        {/* <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
               title="Total Tickets"
@@ -413,9 +422,10 @@ const SupportTickets = () => {
               prefix={<ClockCircleOutlined />}
             />
           </Card>
-        </Col>
+        </Col> */}
 
-        <Col span={24} lg={16}>
+        {/* Commented out all charts */}
+        {/* <Col span={24} lg={16}>
           <Card
             title={
               <>
@@ -448,11 +458,19 @@ const SupportTickets = () => {
           <Card title="Tickets by Priority">
             <Bar data={ticketPriorityData} options={chartOptions} />
           </Card>
-        </Col>
+        </Col> */}
+
+        {/* Only the table remains visible */}
         <Col span={24}>
-          <Card title="All Support Tickets">
-            <Table dataSource={tickets} columns={ticketTableColumns} scroll={ { x: 1000 } }  />
-          </Card>
+          {/* <Card title="All Support Tickets"> */}
+          <CommonTable
+            dataSource={tickets}
+            columns={ticketTableColumns}
+            scroll={{ x: 1000 }}
+            rowKey="id"
+            pagination={true}
+          />
+          {/* </Card> */}
         </Col>
       </Row>
 
@@ -463,36 +481,40 @@ const SupportTickets = () => {
         width={800}
         centered
         footer={[
-            <div className="flex justify-end">
+          <div className="flex justify-end">
             <Button key="close" onClick={() => setIsTicketModalVisible(false)}>
-                Close
-            </Button>,
+              Close
+            </Button>
+            ,
             <PrimaryButton
-                key="reply"
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={() => {
+              key="reply"
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={() => {
                 setIsTicketModalVisible(false);
                 setIsReplyModalVisible(true);
-                }}
-                style={{ marginLeft: 8, width: 100, height: 40 }}
+              }}
+              style={{ marginLeft: 8, width: 100, height: 40 }}
             >
-                Reply
-            </PrimaryButton>,
-            </div>
+              Reply
+            </PrimaryButton>
+            ,
+          </div>,
         ]}
       >
         <div style={{ marginBottom: 16 }}>
           <Text strong>Customer:</Text> {selectedTicket?.customer}
           <Divider />
         </div>
-        <div style={{ 
-          maxHeight: "400px",
-          overflowY: "auto",
-          padding: "0 16px",
-          border: "1px solid #f0f0f0",
-          borderRadius: "4px"
-        }}>
+        <div
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            padding: "0 16px",
+            border: "1px solid #f0f0f0",
+            borderRadius: "4px",
+          }}
+        >
           <TypographyTitle level={5}>Conversation</TypographyTitle>
           <List
             itemLayout="horizontal"

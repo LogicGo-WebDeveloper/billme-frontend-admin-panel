@@ -11,6 +11,7 @@ import Users from './pages/dashboard/users.jsx';
 import Admins from './pages/dashboard/admins.jsx';
 import Dashboard from './pages/dashboard/dashboard.jsx';
 import SupportTickets from './pages/dashboard/support-tickets.jsx';
+import Invoices from './pages/dashboard/invoices.jsx';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path={ROUTES.DASHBOARD.USERS} element={<Users />} />
           <Route path={ROUTES.DASHBOARD.ADMINS} element={<Admins />} />
           <Route path={ROUTES.DASHBOARD.SUPPORT_TICKET} element={<SupportTickets />} />
+          <Route path={ROUTES.DASHBOARD.INVOICES} element={<Invoices />} />
 
         </Route>
       </Routes>

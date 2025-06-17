@@ -9,6 +9,7 @@ import { QUERY_KEYS } from "../../config/query.const";
 import { Content } from "antd/es/layout/layout";
 import CommonLoader from "../../components/common/CommonLoader";
 import StatusBadge from "../../components/common/commonBadge";
+import dayjs from "dayjs";
 
 const Users = () => {
   const [searchText, setSearchText] = useState("");
@@ -69,15 +70,6 @@ const Users = () => {
       render: (email) => email || "-",
     },
     {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      width: 120,
-      render: (role) => (
-        <span style={{  color: "#122751" }}>{role || "-"}</span>
-      ),
-    },
-    {
       title: "Subscription",
       dataIndex: "isSubscribe",
       key: "isSubscribe",
@@ -90,8 +82,15 @@ const Users = () => {
         />
       ),
     },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 200,
+      render: (createdAt) =>
+        createdAt ? dayjs(createdAt).format("DD MMM YYYY") : "-",
+    },
   ];
-
   const handlePaginationChange = (page, newPageSize) => {
     console.log("page changed to", page, "size", newPageSize);
     setCurrentPage(page);
@@ -152,21 +151,53 @@ const Users = () => {
                   columns={columns}
                   dataSource={users}
                   rowKey="_id"
-                  pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: totalUsers,
-                    onChange: handlePaginationChange,
-                    showSizeChanger: true,
-                    responsive: true,
-                    // simple: window.innerWidth < 768,
-                  }}
+                  // pagination={{
+                  //   current: currentPage,
+                  //   pageSize: pageSize,
+                  //   total: totalUsers,
+                  //   onChange: handlePaginationChange,
+                  //   showSizeChanger: true,
+                  //   responsive: true,
+                  //   // simple: window.innerWidth < 768,
+                  // }}
+                  pagination={false}
                   scroll={
                     users.length > 0
                       ? { x: 1000, y: "calc(100vh - 300px)" }
                       : {}
                   }
                 />
+
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
+                  {/* Total Users Text */}
+                  <div className="text-sm text-gray-600 font-medium text-center sm:text-left w-full sm:w-auto px-2 py-1.5 border border-[#d9d9d9] rounded  ">
+                    Total Users: {totalUsers}
+                  </div>
+
+                  {/* Pagination for small screens (centered, no size changer) */}
+                  <div className="w-full sm:hidden flex justify-center">
+                    <Pagination
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={totalUsers}
+                      onChange={handlePaginationChange}
+                      showSizeChanger={false}
+                      responsive
+                    />
+                  </div>
+
+                  {/* Pagination for larger screens (aligned right with size changer) */}
+                  <div className="hidden sm:flex justify-end w-full sm:w-auto">
+                    <Pagination
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={totalUsers}
+                      onChange={handlePaginationChange}
+                      showSizeChanger={true}
+                      responsive
+                    />
+                  </div>
+                </div>
               </div>
             </>
           )}

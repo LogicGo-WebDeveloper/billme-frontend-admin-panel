@@ -32,6 +32,8 @@ import { BiSupport } from "react-icons/bi";
 import DrawerImage from "../../assets/images/auth-icon-left.webp";
 import { RxCross2, RxAvatar } from "react-icons/rx";
 import { MdAddBusiness } from "react-icons/md";
+import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
+
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -63,7 +65,7 @@ const Home = () => {
       label: "Tickets",
       path: "/support-tickets",
     },
-    { key: "5", icon: <MdAddBusiness />, label: "Business", path: "/businesses" },
+    { key: "5", icon: <LiaFileInvoiceDollarSolid />, label: "Invoices", path: "/invoices" },
   ];
 
   const userMenuItems = [

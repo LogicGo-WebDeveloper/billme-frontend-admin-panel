@@ -12,6 +12,7 @@ export const ROUTES = {
         USERS: '/users',
         ADMINS: "/admins",
         SUPPORT_TICKET: "/support-tickets",
+        INVOICES: "/invoices"
     },
     // USER: {
     //     // HOME: '/',

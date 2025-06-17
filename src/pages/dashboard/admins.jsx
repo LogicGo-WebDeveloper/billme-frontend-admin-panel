@@ -7,6 +7,7 @@ import { useFetch, useQueryState } from "../../hooks/useQuery";
 import { ROUTE_PATH } from "../../config/api-routes.config";
 import { QUERY_KEYS } from "../../config/query.const";
 import { Content } from "antd/es/layout/layout";
+import dayjs from "dayjs";
 
 const Admins = () => {
   const [searchText, setSearchText] = useState("");
@@ -63,17 +64,17 @@ const Admins = () => {
       render: (email) => email || "-",
     },
     {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      width: 120,
-      render: (role) => (
-        <span style={{ color: "#122751" }}>
-          {role || "-"}
-        </span>
-      ),
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 200,
+      render: (createdAt) =>
+        createdAt
+          ? dayjs(createdAt).format("DD MMM YYYY")
+          : "-",
     },
   ];
+  
   
   return (
     <>

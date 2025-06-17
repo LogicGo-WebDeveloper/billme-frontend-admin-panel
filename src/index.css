@@ -251,3 +251,16 @@ body {
 }
 
 
+
+/* Force show size selector on all screens */
+.ant-pagination-options {
+  display: block !important;
+  gap: 10px;
+}
+
+/* Compact size selector on mobile */
+@media (max-width: 640px) {
+  .ant-pagination-options-size-changer.ant-select {
+    width: 80px !important;
+  }
+}
