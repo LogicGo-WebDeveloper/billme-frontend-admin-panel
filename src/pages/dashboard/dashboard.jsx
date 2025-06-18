@@ -269,7 +269,7 @@ const Dashboard = () => {
       }}
     >
       <Row gutter={[16, 16]} style={{ flex: 1 }}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Total Revenue"
@@ -278,17 +278,17 @@ const Dashboard = () => {
               valueStyle={{ color: "#01B763" }}
               prefix={<DollarOutlined />}
             />
-            <div style={{ marginTop: 8 }}>
+            {/* <div style={{ marginTop: 8 }}>
               <span style={{ color: "#01B763" }}>
                 <ArrowUpOutlined /> 12%
               </span>
               <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
                 vs last month
               </span>
-            </div>
+            </div> */}
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Total Customers"
@@ -296,17 +296,17 @@ const Dashboard = () => {
               valueStyle={{ color: "#CF1322" }}
               prefix={<UserOutlined />}
             />
-            <div style={{ marginTop: 8 }}>
+            {/* <div style={{ marginTop: 8 }}>
               <span style={{ color: "#CF1322" }}>
                 <ArrowDownOutlined /> 8%
               </span>
               <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
                 vs last month
               </span>
-            </div>
+            </div> */}
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Total Invoices"
@@ -314,17 +314,17 @@ const Dashboard = () => {
               valueStyle={{ color: "#01B763" }}
               prefix={<FileTextOutlined />}
             />
-            <div style={{ marginTop: 8 }}>
+            {/* <div style={{ marginTop: 8 }}>
               <span style={{ color: "#01B763" }}>
                 <ArrowUpOutlined /> 12%
               </span>
               <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
                 vs last month
               </span>
-            </div>
+            </div> */}
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        {/* <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
               title="Pending Orders"
@@ -341,7 +341,7 @@ const Dashboard = () => {
               </span>
             </div>
           </Card>
-        </Col>
+        </Col> */}
 
         <Col span={24} lg={16}>
           <Card
@@ -375,7 +375,13 @@ const Dashboard = () => {
         </Col>
 
         <Col span={24} lg={8}>
-          <Card title="Invoice Status Summary">
+          <Card title={
+            <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
+              <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                Invoice Status
+              </span>
+            </div>
+          }>
             <div style={{ height: 250 }}>
               <Doughnut
                 data={{
@@ -396,12 +402,17 @@ const Dashboard = () => {
         <Col span={24} lg={12}>
           <Card
             title={
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Revenue Overview</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
+              <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                Revenue Overview
+              </span>
+            
+              <div className="w-full sm:w-auto">
                 <Select
                   defaultValue={revenueDuration}
                   onChange={(val) => setRevenueDuration(val)}
-                  style={{ width: 120 }}
+                  style={{ width: "100%", minWidth: 120, maxWidth: 150 }}
+                  className="w-full"
                 >
                   <Option value="yearly">Yearly</Option>
                   <Option value="monthly">Monthly</Option>
@@ -409,6 +420,8 @@ const Dashboard = () => {
                   <Option value="daily">Daily</Option>
                 </Select>
               </div>
+            </div>
+            
             }
           >
             <div style={{ height: 300 }}>
@@ -417,9 +430,15 @@ const Dashboard = () => {
           </Card>
         </Col>
 
-        <Col span={24} lg={12}>
+        {/* <Col span={24} lg={12}>
           <Card
-            title="Upcoming Invoices"
+            title={
+              <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
+                <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                  Upcoming Invoices
+                </span>
+              </div>
+            }
             style={{ height: "100%", padding: "0px" }}
             extra={
               <PrimaryButton
@@ -443,9 +462,9 @@ const Dashboard = () => {
               }
             />
           </Card>
-        </Col>
+        </Col> */}
 
-        <Col span={24} lg={12}>
+        {/* <Col span={24} lg={12}>
           <Card title="Recent Activities" style={{ height: "100%" }}>
             <List
               dataSource={recentActivities}
@@ -460,7 +479,7 @@ const Dashboard = () => {
               )}
             />
           </Card>
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );

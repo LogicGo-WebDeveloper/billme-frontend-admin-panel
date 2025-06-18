@@ -56,13 +56,6 @@ const Users = () => {
       render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
     },
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      width: 200,
-      render: (name) => name || "-",
-    },
-    {
       title: "Email",
       dataIndex: "email",
       key: "email",
@@ -91,6 +84,7 @@ const Users = () => {
         createdAt ? dayjs(createdAt).format("DD MMM YYYY") : "-",
     },
   ];
+
   const handlePaginationChange = (page, newPageSize) => {
     console.log("page changed to", page, "size", newPageSize);
     setCurrentPage(page);
@@ -136,7 +130,7 @@ const Users = () => {
 
           {/* Table */}
           {isLoading ? (
-            <div className="flex justify-center items-center h-full p-5">
+            <div className="flex justify-center items-center h-full p-5 bg-white">
               <CommonSkeleton rows={5} />
               {/* <CommonLoader  /> */}
             </div>
@@ -170,8 +164,12 @@ const Users = () => {
 
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
                   {/* Total Users Text */}
-                  <div className="text-sm text-gray-600 font-medium text-center sm:text-left w-full sm:w-auto px-2 py-1.5 border border-[#d9d9d9] rounded  ">
+                  {/* <div className="text-sm text-[#122751] font-medium text-center w-auto px-2 py-1.5 border border-[#d9d9d9] rounded mt-2  sm:mt-0 ">
                     Total Users: {totalUsers}
+                  </div> */}
+
+                  <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 sm:mt-0">
+                  Total Users: {totalUsers}
                   </div>
 
                   {/* Pagination for small screens (centered, no size changer) */}

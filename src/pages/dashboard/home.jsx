@@ -33,7 +33,7 @@ import DrawerImage from "../../assets/images/auth-icon-left.webp";
 import { RxCross2, RxAvatar } from "react-icons/rx";
 import { MdAddBusiness } from "react-icons/md";
 import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
-
+import { GrUserAdmin } from "react-icons/gr";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -58,7 +58,7 @@ const Home = () => {
   const menuItems = [
     { key: "1", icon: <LineChartOutlined />, label: "Dashboard", path: "/" },
     { key: "2", icon: <UserOutlined />, label: "Users", path: "/users" },
-    { key: "3", icon: <UserOutlined />, label: "Admins", path: "/admins" },
+    { key: "3", icon: <GrUserAdmin size={14} />, label: "Admins", path: "/admins" },
     {
       key: "4",
       icon: <BiSupport />,

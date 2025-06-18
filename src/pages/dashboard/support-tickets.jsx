@@ -15,6 +15,7 @@ import {
   Avatar,
   Typography,
   Divider,
+  Statistic,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -24,6 +25,7 @@ import {
   SendOutlined,
   UserOutlined,
   CustomerServiceOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
 // import { Line, Doughnut, Bar } from "react-chartjs-2";
 // import {
@@ -65,10 +67,10 @@ const SupportTickets = () => {
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [isTicketModalVisible, setIsTicketModalVisible] = useState(false);
 
-  // const totalTickets = 250;
-  // const openTickets = 80;
-  // const closedTickets = 170;
-  // const highPriorityTickets = 25;
+  const totalTickets = 250;
+  const openTickets = 80;
+  const closedTickets = 170;
+  const highPriorityTickets = 25;
 
   // const ticketTrendData = {
   //   yearly: {
@@ -383,7 +385,7 @@ const SupportTickets = () => {
     <div style={{ padding: 24 }}>
       <Row gutter={[16, 16]}>
         {/* Commented out all statistics cards */}
-        {/* <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Total Tickets"
@@ -393,7 +395,7 @@ const SupportTickets = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Open Tickets"
@@ -403,7 +405,7 @@ const SupportTickets = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Closed Tickets"
@@ -413,7 +415,7 @@ const SupportTickets = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        {/* <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
               title="High Priority"

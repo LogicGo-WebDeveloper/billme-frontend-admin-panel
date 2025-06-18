@@ -22,6 +22,9 @@ export const ROUTE_PATH = {
     },
     ADMINS_USERS : {
         GET_USERS : `${API_ADMIN}/admin-user/app-users`,
-        GET_ADMINS : `${API_ADMIN}/admin-user/all-admin-users`
+        GET_ADMINS : `${API_ADMIN}/admin-user/all-admin-users`,
+    },
+    INVOICE : {
+        GET_ALL_INVOICES : `${API_ADMIN}/invoices/list`
     }
 } 
