@@ -12,7 +12,8 @@ export const ROUTES = {
         USERS: '/users',
         ADMINS: "/admins",
         SUPPORT_TICKET: "/support-tickets",
-        INVOICES: "/invoices"
+        INVOICES: "/invoices",
+        INVOICE_PREVIEW: "/invoice-preview"
     },
     // USER: {
     //     // HOME: '/',

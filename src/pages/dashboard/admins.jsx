@@ -123,12 +123,11 @@ const Admins = () => {
                   }
                 />
 
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
+                <div className="flex flex-col md:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
                   {/* Total Admins */}
-                  <div className="text-xs sm:text-sm text-[#122751] font-medium text-center  sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 sm:mt-0">
-  Total Admins: {totalAdmins}
-</div>
-
+                  <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
+                    Total Admins: {totalAdmins}
+                  </div>
 
                   {/* Pagination for small screens */}
                   <div className="w-full sm:hidden flex justify-center">

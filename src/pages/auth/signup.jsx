@@ -90,6 +90,7 @@ const Signup = () => {
                 placeholder="Enter your full name"
                 size="large"
                 className="custom-placeholder"
+                autoComplete="username"
               />
             </Form.Item>
 
@@ -103,6 +104,7 @@ const Signup = () => {
                 placeholder="Enter your email"
                 size="large"
                 className="custom-placeholder"
+                autoComplete="email"
               />
             </Form.Item>
 
@@ -116,6 +118,7 @@ const Signup = () => {
                 placeholder="Create a password"
                 size="large"
                 className="custom-placeholder"
+                autoComplete="password"
               />
             </Form.Item>
 

@@ -10,6 +10,8 @@ import { ROUTE_PATH } from "../../config/api-routes.config";
 import { QUERY_KEYS } from "../../config/query.const";
 import dayjs from "dayjs";
 import { Content } from "antd/es/layout/layout";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../config/route.const";
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -22,6 +24,8 @@ const Invoices = () => {
   const [dateRange, setDateRange] = useState([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const navigate = useNavigate();
 
   const buildQueryURL = () => {
     let url = `${ROUTE_PATH.INVOICE.GET_ALL_INVOICES}?page=${currentPage}&limit=${pageSize}`;
@@ -110,10 +114,14 @@ const Invoices = () => {
       render: (_, record) => (
         <PrimaryButton
           type="primary"
-          icon={<EyeOutlined />}
+          // icon={<EyeOutlined />}
           onClick={() => {
             setPreviewUrl(record?.InvoiceUrl);
-            setPreviewVisible(true);
+            navigate(
+              `${ROUTES.DASHBOARD.INVOICE_PREVIEW}?url=${encodeURIComponent(
+                record.InvoiceUrl ? record.InvoiceUrl : record?.templateUrl
+              )}`
+            );
           }}
           style={{ width: 100, height: 32, fontSize: "12px" }}
         >
@@ -123,13 +131,21 @@ const Invoices = () => {
     },
   ];
 
+  // Handle pagination change
   const handlePaginationChange = (page, newPageSize) => {
     setCurrentPage(page);
     setPageSize(newPageSize);
   };
 
+  // Handle date range change
   const handleDateRangeChange = (dates) => {
     setDateRange(dates);
+    setCurrentPage(1);
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
     setCurrentPage(1);
   };
 
@@ -137,10 +153,18 @@ const Invoices = () => {
     <>
       <div className="flex flex-wrap gap-4 p-6">
         {/* Search Input */}
+        <Input
+          placeholder="Search..."
+          prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+          className=" md:max-w-sm"
+          onChange={handleSearchChange}
+          value={searchText}
+        />
+
         {/* Subscription Filter */}
         <Select
           placeholder="Subscription"
-          className="w-full md:w-[160px]"
+          className=" md:w-[160px]"
           onChange={(value) => {
             setSubscriptionFilter(value);
             setCurrentPage(1);
@@ -156,7 +180,7 @@ const Invoices = () => {
         {/* Invoice Status Filter */}
         <Select
           placeholder="Invoice Status"
-          className="w-full md:w-[160px]"
+          className=" md:w-[160px]"
           onChange={(value) => {
             setInvoiceStatusFilter(value);
             setCurrentPage(1);
@@ -174,7 +198,7 @@ const Invoices = () => {
 
         {/* Date Range Picker */}
         <RangePicker
-          className="w-full md:w-[250px]"
+          className=" md:w-[250px]"
           onChange={handleDateRangeChange}
           value={dateRange}
         />
@@ -205,22 +229,32 @@ const Invoices = () => {
                   }
                 />
 
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
+                <div className="flex flex-col lg:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
                   {/* Total Invoices Text */}
-                  <div className="text-sm text-[#122751] font-medium text-center w-auto px-2 py-1.5 border border-[#d9d9d9] rounded mt-2 sm:mt-0">
+                  <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
                     Total Invoices: {totalInvoices}
                   </div>
 
                   {/* Pagination */}
-                  <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                  <div className="w-full sm:hidden flex justify-center">
                     <Pagination
                       current={currentPage}
                       pageSize={pageSize}
                       total={totalInvoices}
                       onChange={handlePaginationChange}
-                      showSizeChanger
+                      showSizeChanger={false}
                       responsive
-                      className="flex justify-center sm:justify-end"
+                    />
+                  </div>
+
+                  <div className="hidden sm:flex justify-end w-full sm:w-auto">
+                    <Pagination
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={totalInvoices}
+                      onChange={handlePaginationChange}
+                      showSizeChanger={true}
+                      responsive
                     />
                   </div>
                 </div>
@@ -229,15 +263,24 @@ const Invoices = () => {
           )}
         </div>
       </Content>
-
       <Modal
         open={previewVisible}
         onCancel={() => setPreviewVisible(false)}
         footer={null}
         width={900}
+        style={{ padding: "0px" }}
       >
+        {/* <iframe
+          src={
+            "https://guardianshot.blr1.cdn.digitaloceanspaces.com/billme/684bc81b6cd3cf2f803e0f1c/14963bc0-ea1a-416c-ab3e-86edf4f5dd02.pdf"
+          }
+          title="Invoice Preview"
+          style={{ width: "100%", height: "80vh", border: "none" }}
+        /> */}
         <iframe
-          src={previewUrl}
+          src={`https://docs.google.com/gview?url=${encodeURIComponent(
+            previewUrl
+          )}&embedded=true`}
           title="Invoice Preview"
           style={{ width: "100%", height: "80vh", border: "none" }}
         />

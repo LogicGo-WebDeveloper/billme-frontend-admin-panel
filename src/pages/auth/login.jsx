@@ -26,10 +26,8 @@ const Login = () => {
     ROUTE_PATH.AUTH.LOGIN,
     {
       onSuccess: async (data) => {
-
         const userRole = data.data?.user?.role;
         if (userRole !== "admin" && userRole !== "owner") {
-          console.log("inside if");
           messageApi.open({
             type: "error",
             content: "Access denied. Admins and owners only.",
@@ -46,6 +44,7 @@ const Login = () => {
         navigate(ROUTES.DASHBOARD.HOME);
       },
       onError: (error) => {
+        console.log("error", error);
         setShowLoader(false);
         messageApi.open({
           type: "error",

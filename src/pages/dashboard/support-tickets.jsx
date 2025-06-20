@@ -16,6 +16,7 @@ import {
   Typography,
   Divider,
   Statistic,
+  Pagination,
 } from "antd";
 import {
   ExclamationCircleOutlined,
@@ -66,11 +67,19 @@ const SupportTickets = () => {
   const [replyText, setReplyText] = useState("");
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [isTicketModalVisible, setIsTicketModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const totalTickets = 250;
   const openTickets = 80;
   const closedTickets = 170;
   const highPriorityTickets = 25;
+
+  const handlePaginationChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+    // Optionally fetch new data here if it's paginated server-side
+  };
 
   // const ticketTrendData = {
   //   yearly: {
@@ -464,15 +473,48 @@ const SupportTickets = () => {
 
         {/* Only the table remains visible */}
         <Col span={24}>
-          {/* <Card title="All Support Tickets"> */}
-          <CommonTable
-            dataSource={tickets}
-            columns={ticketTableColumns}
-            scroll={{ x: 1000 }}
-            rowKey="id"
-            pagination={true}
-          />
-          {/* </Card> */}
+          <div className="overflow-x-auto">
+            <CommonTable
+              dataSource={tickets}
+              columns={ticketTableColumns}
+              rowKey="id"
+              pagination={false}
+              scroll={
+                tickets.length > 0 ? { x: 1000, y: "calc(100vh - 300px)" } : {}
+              }
+            />
+
+            <div className="flex flex-col lg:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
+              {/* Total Tickets Text */}
+              <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
+                Total Tickets: 120
+              </div>
+
+              {/* Pagination for Mobile */}
+              <div className="w-full sm:hidden flex justify-center">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={120} // Replace with dynamic value when available
+                  onChange={handlePaginationChange}
+                  showSizeChanger={false}
+                  responsive
+                />
+              </div>
+
+              {/* Pagination for Desktop */}
+              <div className="hidden sm:flex justify-end w-full sm:w-auto">
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={120} // Replace with dynamic value when available
+                  onChange={handlePaginationChange}
+                  showSizeChanger={true}
+                  responsive
+                />
+              </div>
+            </div>
+          </div>
         </Col>
       </Row>
 

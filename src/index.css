@@ -358,3 +358,11 @@ body {
 .ant-picker-input {
   padding: 0 8px;
 }
+
+.rpv-core__inner-page {
+  background-color: #313131 !important;
+}
+
+.rpv-core__inner-pages {
+  background-color: #313131 !important;
+}

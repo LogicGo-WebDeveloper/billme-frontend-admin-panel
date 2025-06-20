@@ -10,6 +10,8 @@ import {
   Space,
   Select,
   Table,
+  Divider,
+  Skeleton,
 } from "antd";
 import {
   ArrowUpOutlined,
@@ -18,6 +20,7 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
   FileTextOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import {
@@ -35,6 +38,17 @@ import {
 import CommonTable from "../../components/CommonTable";
 import PrimaryButton from "../../components/common/primary.button";
 import StatusBadge from "../../components/common/commonBadge";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../config/route.const";
+import { useFetch, useQueryState } from "../../hooks/useQuery";
+import { QUERY_KEYS } from "../../config/query.const";
+import { ROUTE_PATH } from "../../config/api-routes.config";
+import CommonSkeleton from "../../components/common/CommonSkeleton";
+import CommonLoader from "../../components/common/CommonLoader";
+import dayjs from "dayjs";
+import { RiMoneyDollarCircleFill, RiMoneyDollarCircleLine } from "react-icons/ri";
+import { MdAttachMoney } from "react-icons/md";
+
 
 ChartJS.register(
   CategoryScale,
@@ -50,13 +64,53 @@ ChartJS.register(
 
 const Dashboard = () => {
   const { Option } = Select;
-  const [duration, setDuration] = useState("monthly");
+  const [userTimeType, setUserTimeType] = useState("monthly");
   const [revenueDuration, setRevenueDuration] = useState("monthly");
+  const [invoiceDuration, setInvoiceDuration] = useState("monthly");
+  const navigate = useNavigate();
+
+  const buildDashboardQueryURL = () => {
+    const base = `${ROUTE_PATH.DASHBOARD.GET_DASHBOARD}`;
+    const params = new URLSearchParams();
+
+    if (userTimeType) params.append("userTimeType", userTimeType);
+
+    return `${base}?${params.toString()}`;
+  };
+
+  const query = useFetch(
+    [QUERY_KEYS.DASHBOARD.GET_DASHBOARD, userTimeType],
+    buildDashboardQueryURL(),
+    { refetchOnWindowFocus: false }
+  );
+
+  const { isLoading, isError, data, error } = useQueryState(query);
+  const dashboardData = data?.data;
+
+  const buildRecentInvoicesURL = () =>
+    `${ROUTE_PATH.INVOICE.GET_ALL_INVOICES}?limit=10&page=1&sortBy=createdAt:desc`;
+
+  const recentInvoicesQuery = useFetch(
+    [QUERY_KEYS.INVOICE.RECENT_INVOICES],
+    buildRecentInvoicesURL(),
+    { refetchOnWindowFocus: false }
+  );
+
+  const { data: recentInvoicesData, isLoading: recentInvoicesLoading } =
+    useQueryState(recentInvoicesQuery);
+  const invoices = recentInvoicesData?.data || [];
+  console.log(invoices);
+
+  if (isLoading) {
+    return <CommonLoader />;
+  }
 
   const userData = {
     yearly: {
       labels: ["2020", "2021", "2022", "2023", "2024"],
-      data: [500, 1200, 1500, 2400, 2000],
+      all: [800, 1200, 1800, 2400, 2600],
+      subscribed: [500, 900, 1300, 1800, 2000],
+      notSubscribed: [300, 300, 500, 600, 600],
     },
     monthly: {
       labels: [
@@ -73,28 +127,98 @@ const Dashboard = () => {
         "Nov",
         "Dec",
       ],
-      data: [120, 190, 150, 250, 220, 300, 310, 280, 260, 290, 320, 850],
+      all: [200, 250, 300, 280, 350, 400, 420, 410, 390, 420, 430, 480],
+      subscribed: [150, 180, 220, 200, 270, 310, 320, 310, 300, 330, 340, 380],
+      notSubscribed: [50, 70, 80, 80, 100, 90, 100, 120, 90, 90, 90, 140],
     },
     weekly: {
       labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      data: [30, 45, 50, 40, 70, 80, 60],
+      all: [120, 150, 170, 160, 200, 220, 180],
+      subscribed: [90, 110, 130, 120, 150, 170, 140],
+      notSubscribed: [30, 40, 40, 40, 50, 50, 40],
     },
     daily: {
       labels: ["8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM"],
-      data: [5, 10, 15, 10, 20, 18, 22],
+      all: [25, 40, 60, 50, 70, 90, 100],
+      subscribed: [18, 30, 45, 35, 50, 65, 75],
+      notSubscribed: [7, 10, 15, 15, 20, 25, 25],
+    },
+  };
+
+  const invoiceData = {
+    yearly: {
+      labels: ["2020", "2021", "2022", "2023", "2024"],
+      datasets: {
+        paid: [1000, 1500, 1800, 2200, 2400],
+        unpaid: [300, 400, 350, 300, 250],
+        overdue: [100, 150, 200, 180, 160],
+      },
+    },
+    monthly: {
+      labels: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      datasets: {
+        paid: [200, 220, 250, 230, 270, 290, 310, 320, 300, 330, 340, 360],
+        unpaid: [50, 60, 55, 65, 60, 58, 62, 59, 57, 63, 61, 60],
+        overdue: [20, 18, 22, 21, 23, 25, 20, 22, 21, 24, 26, 28],
+      },
+    },
+    weekly: {
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      datasets: {
+        paid: [300, 320, 310, 305, 330, 340, 350],
+        unpaid: [80, 85, 82, 80, 83, 85, 88],
+        overdue: [20, 22, 21, 23, 24, 26, 25],
+      },
+    },
+    daily: {
+      labels: ["8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM"],
+      datasets: {
+        paid: [30, 35, 40, 38, 42, 45, 50],
+        unpaid: [10, 12, 11, 13, 12, 14, 15],
+        overdue: [3, 4, 4, 5, 5, 6, 6],
+      },
     },
   };
 
   const chartData = {
-    labels: userData[duration].labels,
+    labels: userData[userTimeType].labels,
     datasets: [
       {
-        label: "Users",
-        data: userData[duration].data,
+        label: "All Users",
+        data: userData[userTimeType].all,
         borderColor: "#01B763",
         backgroundColor: "rgba(1, 183, 99, 0.1)",
         tension: 0.4,
-        fill: true,
+        fill: false,
+      },
+      {
+        label: "Subscribed Users",
+        data: userData[userTimeType].subscribed,
+        borderColor: "#1890ff",
+        backgroundColor: "rgba(24, 144, 255, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+      {
+        label: "Not Subscribed Users",
+        data: userData[userTimeType].notSubscribed,
+        borderColor: "#ff4d4f",
+        backgroundColor: "rgba(255, 77, 79, 0.1)",
+        tension: 0.4,
+        fill: false,
       },
     ],
   };
@@ -152,6 +276,14 @@ const Dashboard = () => {
       legend: {
         position: "bottom",
       },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const value = context.raw || 0;
+            return `${value}%`;
+          },
+        },
+      },
     },
   };
 
@@ -173,91 +305,97 @@ const Dashboard = () => {
     },
   ];
 
-  const upcomingInvoices = [
-    {
-      id: "1",
-      invoice: "#M/001",
-      customer: "John Dee",
-      amount: "$2,500",
-      due: "2024-06-20",
-      status: "Unpaid",
-    },
-    {
-      id: "2",
-      invoice: "#M/002",
-      customer: "Jane Keith",
-      amount: "$600",
-      due: "2024-06-18",
-      status: "Paid",
-    },
-    {
-      id: "3",
-      invoice: "#M/003",
-      customer: "Anne Crop",
-      amount: "$2,310",
-      due: "2024-06-23",
-      status: "Overdue",
-    },
-    {
-      id: "4",
-      invoice: "#M/004",
-      customer: "Robert Smith",
-      amount: "$1,200",
-      due: "2024-06-25",
-      status: "Unpaid",
-    },
-    {
-      id: "5",
-      invoice: "#M/005",
-      customer: "Emily Johnson",
-      amount: "$850",
-      due: "2024-06-19",
-      status: "Unpaid",
-    },
-  ];
-
   // Table columns configuration
-  const invoiceColumns = [
-    { title: "Invoice #", dataIndex: "invoice", key: "invoice" },
-    { title: "Customer", dataIndex: "customer", key: "customer" },
-    { title: "Amount", dataIndex: "amount", key: "amount" },
-    { title: "Due Date", dataIndex: "due", key: "due" },
+  const invoiceTableColumns = [
+    {
+      title: "No.",
+      key: "index",
+      width: 80,
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: "Invoice Number",
+      dataIndex: "invoiceNumber",
+      key: "invoiceNumber",
+      width: 200,
+      render: (text) => text || " - ",
+    },
     {
       title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text) => {
-        const statusConfig = {
-          Paid: {
-            bgColor: "#DFF6EA",
-            textColor: "#029E74",
-          },
-          Unpaid: {
-            bgColor: "#FFF4E5",
-            textColor: "#F7931E",
-          },
-          Overdue: {
-            bgColor: "#FDECEA",
-            textColor: "#E53935",
-          },
-          default: {
-            bgColor: "#ECEFF1",
-            textColor: "#607D8B",
-          },
+      dataIndex: "invoiceStatus",
+      key: "invoiceStatus",
+      width: 160,
+      render: (status) => {
+        const statusMap = {
+          Draft: { bgColor: "#E0E7FF", textColor: "#3730A3" },
+          Unpaid: { bgColor: "#FEE2E2", textColor: "#B91C1C" },
+          Paid: { bgColor: "#d1fae5", textColor: "#047857" },
+          Cancel: { bgColor: "#F3F4F6", textColor: "#6B7280" },
+          OverDue: { bgColor: "#FEF3C7", textColor: "#92400E" },
+        };
+        const { bgColor, textColor } = statusMap[status] || {
+          bgColor: "#E5E7EB",
+          textColor: "#374151",
         };
 
-        const config = statusConfig[text] || statusConfig.default;
-
         return (
-          <StatusBadge
-            label={text}
-            bgColor={config.bgColor}
-            textColor={config.textColor}
-          />
+          <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />
         );
       },
     },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 200,
+      render: (date) => dayjs(date).format("DD MMM YYYY"),
+    },
+    {
+      title: "Action",
+      key: "action",
+      width: 120,
+      render: (_, record) => (
+        <PrimaryButton
+          type="primary"
+          // icon={<EyeOutlined />}
+          onClick={() => navigate(ROUTES.DASHBOARD.INVOICES)}
+          style={{ width: 100, height: 32, fontSize: "12px" }}
+        >
+          View
+        </PrimaryButton>
+      ),
+    },
   ];
+
+  const invoiceChartData = {
+    labels: invoiceData[invoiceDuration].labels,
+    datasets: [
+      {
+        label: "Paid",
+        data: invoiceData[invoiceDuration].datasets.paid,
+        borderColor: "#01B763",
+        backgroundColor: "rgba(1, 183, 99, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+      {
+        label: "Unpaid",
+        data: invoiceData[invoiceDuration].datasets.unpaid,
+        borderColor: "#1890ff",
+        backgroundColor: "rgba(24, 144, 255, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+      {
+        label: "Overdue",
+        data: invoiceData[invoiceDuration].datasets.overdue,
+        borderColor: "#ff4d4f",
+        backgroundColor: "rgba(255, 77, 79, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+    ],
+  };
 
   return (
     <div
@@ -269,79 +407,73 @@ const Dashboard = () => {
       }}
     >
       <Row gutter={[16, 16]} style={{ flex: 1 }}>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Total Revenue"
-              value={112893}
-              precision={2}
-              valueStyle={{ color: "#01B763" }}
-              prefix={<DollarOutlined />}
-            />
-            {/* <div style={{ marginTop: 8 }}>
-              <span style={{ color: "#01B763" }}>
-                <ArrowUpOutlined /> 12%
-              </span>
-              <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
-                vs last month
-              </span>
-            </div> */}
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Total Customers"
-              value={89}
-              valueStyle={{ color: "#CF1322" }}
-              prefix={<UserOutlined />}
-            />
-            {/* <div style={{ marginTop: 8 }}>
-              <span style={{ color: "#CF1322" }}>
-                <ArrowDownOutlined /> 8%
-              </span>
-              <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
-                vs last month
-              </span>
-            </div> */}
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Total Invoices"
-              value={156}
-              valueStyle={{ color: "#01B763" }}
-              prefix={<FileTextOutlined />}
-            />
-            {/* <div style={{ marginTop: 8 }}>
-              <span style={{ color: "#01B763" }}>
-                <ArrowUpOutlined /> 12%
-              </span>
-              <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
-                vs last month
-              </span>
-            </div> */}
-          </Card>
-        </Col>
-        {/* <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Pending Orders"
-              value={23}
-              valueStyle={{ color: "#CF1322" }}
-              prefix={<ShoppingCartOutlined />}
-            />
-            <div style={{ marginTop: 8 }}>
-              <span style={{ color: "#CF1322" }}>
-                <ArrowDownOutlined /> 6%
-              </span>
-              <span style={{ marginLeft: 8, color: "rgba(0,0,0,0.45)" }}>
-                vs last month
-              </span>
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="rounded-2xl shadow-md border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#DBEAFE] text-[#1D4ED8] p-3 rounded-full">
+                <UserOutlined className="text-xl" />
+              </div>
+              <div>
+                <div className="text-gray-500 text-sm">Total Customers</div>
+                <div className="text-2xl font-semibold text-gray-800">
+                  {dashboardData?.totalUsers || 0}
+                </div>
+              </div>
             </div>
           </Card>
-        </Col> */}
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="rounded-2xl shadow-md border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#D1FAE5] text-[#059669] p-3 rounded-full">
+                <FileTextOutlined className="text-xl" />
+              </div>
+              <div>
+                <div className="text-gray-500 text-sm">Total Invoices</div>
+                <div className="text-2xl font-semibold text-gray-800">
+                  {dashboardData?.totalInvoices || 0}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="rounded-2xl shadow-md border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#EDE9FE] text-[#7C3AED] p-2 rounded-full">
+                <MdAttachMoney className="text-2xl" />
+              </div>
+              <div>
+                <div className="text-gray-500 text-sm">
+                  Subscribed Customers
+                </div>
+                <div className="text-2xl font-semibold text-gray-800">
+                  {dashboardData?.subscribedUsers || 1510}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="rounded-2xl shadow-md border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#FEF3C7] text-[#F59E0B] p-3 rounded-full">
+                <UserOutlined className="text-xl" />
+              </div>
+              <div>
+                <div className="text-gray-500 text-sm">
+                  Not Subscribed Customers
+                </div>
+                <div className="text-2xl font-semibold text-gray-800">
+                  {dashboardData?.notSubscribedUsers || 553}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Col>
 
         <Col span={24} lg={16}>
           <Card
@@ -353,8 +485,8 @@ const Dashboard = () => {
 
                 <div className="w-full sm:w-auto">
                   <Select
-                    defaultValue={duration}
-                    onChange={(val) => setDuration(val)}
+                    defaultValue={userTimeType}
+                    onChange={(val) => setUserTimeType(val)}
                     style={{ width: "100%", minWidth: 120, maxWidth: 150 }}
                     className="w-full"
                   >
@@ -374,22 +506,38 @@ const Dashboard = () => {
           </Card>
         </Col>
 
+        {/* invoice status Doughnut chart */}
         <Col span={24} lg={8}>
-          <Card title={
-            <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
-              <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
-                Invoice Status
-              </span>
-            </div>
-          }>
-            <div style={{ height: 250 }}>
+          <Card
+            title={
+              <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
+                <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                  Invoice Status
+                </span>
+              </div>
+            }
+          >
+            <div style={{ height: 300 }}>
               <Doughnut
                 data={{
-                  labels: ["Paid", "Unpaid", "Overdue"],
+                  labels: ["Paid", "Unpaid", "OverDue"],
                   datasets: [
                     {
-                      data: [60, 25, 15],
+                      data: dashboardData?.invoiceStatusPercentage
+                        ? [
+                            parseFloat(
+                              dashboardData.invoiceStatusPercentage.Paid || 0
+                            ),
+                            parseFloat(
+                              dashboardData.invoiceStatusPercentage.Unpaid || 0
+                            ),
+                            parseFloat(
+                              dashboardData.invoiceStatusPercentage.OverDue || 0
+                            ),
+                          ]
+                        : [0, 0, 0],
                       backgroundColor: ["#01B763", "#1890ff", "#ff4d4f"],
+                      borderWidth: 1,
                     },
                   ],
                 }}
@@ -399,87 +547,89 @@ const Dashboard = () => {
           </Card>
         </Col>
 
-        <Col span={24} lg={12}>
+        {/* <Col span={24} lg={12}>
           <Card
             title={
               <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
-              <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
-                Revenue Overview
-              </span>
-            
-              <div className="w-full sm:w-auto">
-                <Select
-                  defaultValue={revenueDuration}
-                  onChange={(val) => setRevenueDuration(val)}
-                  style={{ width: "100%", minWidth: 120, maxWidth: 150 }}
-                  className="w-full"
-                >
-                  <Option value="yearly">Yearly</Option>
-                  <Option value="monthly">Monthly</Option>
-                  <Option value="weekly">Weekly</Option>
-                  <Option value="daily">Daily</Option>
-                </Select>
+                <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                  Revenue Overview
+                </span>
+
+                <div className="w-full sm:w-auto">
+                  <Select
+                    defaultValue={revenueDuration}
+                    onChange={(val) => setRevenueDuration(val)}
+                    style={{ width: "100%", minWidth: 120, maxWidth: 150 }}
+                    className="w-full"
+                  >
+                    <Option value="yearly">Yearly</Option>
+                    <Option value="monthly">Monthly</Option>
+                    <Option value="weekly">Weekly</Option>
+                    <Option value="daily">Daily</Option>
+                  </Select>
+                </div>
               </div>
-            </div>
-            
             }
           >
             <div style={{ height: 300 }}>
               <Bar data={revenueChartData} options={chartOptions} />
             </div>
           </Card>
-        </Col>
+        </Col> */}
 
-        {/* <Col span={24} lg={12}>
+        <Col span={24} lg={24}>
           <Card
             title={
               <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
                 <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
-                  Upcoming Invoices
+                  Invoice Overview
+                </span>
+
+                <div className="w-full sm:w-auto">
+                  <Select
+                    defaultValue={invoiceDuration}
+                    onChange={(val) => setInvoiceDuration(val)}
+                    style={{ width: "100%", minWidth: 120, maxWidth: 150 }}
+                    className="w-full"
+                  >
+                    <Option value="yearly">Yearly</Option>
+                    <Option value="monthly">Monthly</Option>
+                    <Option value="weekly">Weekly</Option>
+                    <Option value="daily">Daily</Option>
+                  </Select>
+                </div>
+              </div>
+            }
+          >
+            <div style={{ height: 300 }}>
+              <Line data={invoiceChartData} options={chartOptions} />
+            </div>
+          </Card>
+        </Col>
+
+        <Col span={24} lg={24}>
+          <Card
+            title={
+              <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
+                <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
+                  Recent Invoices
                 </span>
               </div>
             }
             style={{ height: "100%", padding: "0px" }}
-            extra={
-              <PrimaryButton
-                type="primary"
-                size="small"
-                style={{ width: "auto", height: "30px", fontSize: "12px" }}
-              >
-                View All
-              </PrimaryButton>
-            }
+            className="customCard"
           >
             <CommonTable
-              dataSource={upcomingInvoices}
-              columns={invoiceColumns}
-              pagination={{ pageSize: 5 }}
+              dataSource={invoices}
+              columns={invoiceTableColumns}
+              pagination={false}
               rowKey="id"
               scroll={
-                upcomingInvoices.length > 0
-                  ? { x: 1000, y: "calc(100vh - 300px)" }
-                  : {}
+                invoices.length > 0 ? { x: 1000, y: "calc(75vh - 300px)" } : {}
               }
             />
           </Card>
-        </Col> */}
-
-        {/* <Col span={24} lg={12}>
-          <Card title="Recent Activities" style={{ height: "100%" }}>
-            <List
-              dataSource={recentActivities}
-              renderItem={(item) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={item.title}
-                    description={item.description}
-                  />
-                  <div>{item.time}</div>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col> */}
+        </Col>
       </Row>
     </div>
   );
