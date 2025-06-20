@@ -15,6 +15,7 @@ export const QUERY_KEYS = {
   },
   INVOICE: {
     GET_ALL_INVOICES: "get-all-invoices",
+    GET_INVOICES_BY_USER: "get-invoices-by-user"
   },
   DASHBOARD: {
     GET_DASHBOARD: "get-dashboard",

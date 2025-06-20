@@ -123,7 +123,7 @@ const Invoices = () => {
               )}`
             );
           }}
-          style={{ width: 100, height: 32, fontSize: "12px" }}
+          style={{ width: 80, height: 32, fontSize: "12px" }}
         >
           View
         </PrimaryButton>

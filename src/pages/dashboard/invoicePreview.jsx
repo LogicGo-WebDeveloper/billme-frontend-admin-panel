@@ -1,7 +1,4 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Worker, Viewer, SpecialZoomLevel } from "@react-pdf-viewer/core";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { ROUTES } from "../../config/route.const";
 import { RxCross2 } from "react-icons/rx";
 
@@ -23,12 +20,16 @@ const InvoicePreview = () => {
         </button>
       </div>
 
-      {/* PDF Viewer */}
+      {/* PDF Viewer via Google Docs (CORS Safe) */}
       <div className="flex-1 overflow-hidden">
         {pdfUrl ? (
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-            <Viewer fileUrl={pdfUrl} defaultScale={SpecialZoomLevel.PageFit} />
-          </Worker>
+          <iframe
+            src={`https://docs.google.com/gview?url=${encodeURIComponent(
+              pdfUrl
+            )}&embedded=true`}
+            title="Invoice PDF Preview"
+            style={{ width: "100%", height: "100%", border: "none" }}
+          />
         ) : (
           <div className="text-center mt-10 text-red-500">Invalid PDF URL</div>
         )}

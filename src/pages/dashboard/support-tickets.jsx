@@ -351,26 +351,6 @@ const SupportTickets = () => {
       },
     },
     {
-      title: "Priority",
-      dataIndex: "priority",
-      key: "priority",
-      render: (priority) => {
-        const badgeMap = {
-          High: { bgColor: "#FEE2E2", textColor: "#B91C1C" },
-          Medium: { bgColor: "#FEF3C7", textColor: "#92400E" },
-          Low: { bgColor: "#DCFCE7", textColor: "#15803D" },
-        };
-        const { bgColor, textColor } = badgeMap[priority] || {};
-        return (
-          <StatusBadge
-            label={priority}
-            bgColor={bgColor}
-            textColor={textColor}
-          />
-        );
-      },
-    },
-    {
       title: "Action",
       key: "action",
       render: (_, record) => (

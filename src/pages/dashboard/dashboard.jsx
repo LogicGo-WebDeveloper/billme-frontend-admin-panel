@@ -46,9 +46,11 @@ import { ROUTE_PATH } from "../../config/api-routes.config";
 import CommonSkeleton from "../../components/common/CommonSkeleton";
 import CommonLoader from "../../components/common/CommonLoader";
 import dayjs from "dayjs";
-import { RiMoneyDollarCircleFill, RiMoneyDollarCircleLine } from "react-icons/ri";
+import {
+  RiMoneyDollarCircleFill,
+  RiMoneyDollarCircleLine,
+} from "react-icons/ri";
 import { MdAttachMoney } from "react-icons/md";
-
 
 ChartJS.register(
   CategoryScale,
@@ -69,23 +71,99 @@ const Dashboard = () => {
   const [invoiceDuration, setInvoiceDuration] = useState("monthly");
   const navigate = useNavigate();
 
+  // const buildDashboardQueryURL = () => {
+  //   const base = `${ROUTE_PATH.DASHBOARD.GET_DASHBOARD}`;
+  //   const params = new URLSearchParams();
+
+  //   if (userTimeType) params.append("userTimeType", userTimeType);
+
+  //   return `${base}?${params.toString()}`;
+  // };
+
   const buildDashboardQueryURL = () => {
     const base = `${ROUTE_PATH.DASHBOARD.GET_DASHBOARD}`;
     const params = new URLSearchParams();
 
-    if (userTimeType) params.append("userTimeType", userTimeType);
+    if (userTimeType) params.append("userFilter", userTimeType);
+    if (invoiceDuration) params.append("invoiceFilter", invoiceDuration);
 
     return `${base}?${params.toString()}`;
   };
 
   const query = useFetch(
-    [QUERY_KEYS.DASHBOARD.GET_DASHBOARD, userTimeType],
+    [QUERY_KEYS.DASHBOARD.GET_DASHBOARD, userTimeType, invoiceDuration],
     buildDashboardQueryURL(),
     { refetchOnWindowFocus: false }
   );
 
   const { isLoading, isError, data, error } = useQueryState(query);
   const dashboardData = data?.data;
+
+  const transformChartData = (input) => {
+    if (!input || !Array.isArray(input)) return [];
+    return input.map((item) => item?.value || 0);
+  };
+
+  const transformChartLabels = (input) => {
+    if (!input || !Array.isArray(input)) return [];
+    return input.map((item) => item?.key || "");
+  };
+
+  const userChartRaw = dashboardData?.userChart || {};
+  console.log("userChartRaw", userChartRaw);
+
+  const userChart = {
+    labels: transformChartLabels(userChartRaw?.totalUsers),
+    all: transformChartData(userChartRaw?.totalUsers),
+    subscribed: transformChartData(userChartRaw?.subscribeUsers),
+    notSubscribed: transformChartData(userChartRaw?.unsubscribedUsers),
+  };
+
+  // console.log("userChart", userChart);
+
+  const invoiceChartRaw = dashboardData?.invoiceChart || {};
+  console.log("invoiceChartRaw", invoiceChartRaw);
+
+  const invoiceChart = {
+    labels: transformChartLabels(invoiceChartRaw?.Paid),
+    paid: transformChartData(invoiceChartRaw?.Paid),
+    unpaid: transformChartData(invoiceChartRaw?.Unpaid),
+    overdue: transformChartData(invoiceChartRaw?.OverDue),
+  };
+
+  const invoiceChartData = {
+    labels: invoiceChart.labels,
+    datasets: [
+      {
+        label: "Paid",
+        data: invoiceChart.paid,
+        borderColor: "#01B763",
+        backgroundColor: "rgba(1, 183, 99, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+      {
+        label: "Unpaid",
+        data: invoiceChart.unpaid,
+        borderColor: "#1890ff",
+        backgroundColor: "rgba(24, 144, 255, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+      {
+        label: "Overdue",
+        data: invoiceChart.overdue,
+        borderColor: "#ff4d4f",
+        backgroundColor: "rgba(255, 77, 79, 0.1)",
+        tension: 0.4,
+        fill: false,
+      },
+    ],
+  };
+
+  console.log("invoiceChart", invoiceChart);
+
+  console.log("userChart", userChart);
 
   const buildRecentInvoicesURL = () =>
     `${ROUTE_PATH.INVOICE.GET_ALL_INVOICES}?limit=10&page=1&sortBy=createdAt:desc`;
@@ -99,7 +177,6 @@ const Dashboard = () => {
   const { data: recentInvoicesData, isLoading: recentInvoicesLoading } =
     useQueryState(recentInvoicesQuery);
   const invoices = recentInvoicesData?.data || [];
-  console.log(invoices);
 
   if (isLoading) {
     return <CommonLoader />;
@@ -193,12 +270,42 @@ const Dashboard = () => {
     },
   };
 
+  // const userChartData = {
+  //   labels: userData[userTimeType].labels,
+  //   datasets: [
+  //     {
+  //       label: "All Users",
+  //       data: userData[userTimeType].all,
+  //       borderColor: "#01B763",
+  //       backgroundColor: "rgba(1, 183, 99, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //     {
+  //       label: "Subscribed Users",
+  //       data: userData[userTimeType].subscribed,
+  //       borderColor: "#1890ff",
+  //       backgroundColor: "rgba(24, 144, 255, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //     {
+  //       label: "Not Subscribed Users",
+  //       data: userData[userTimeType].notSubscribed,
+  //       borderColor: "#ff4d4f",
+  //       backgroundColor: "rgba(255, 77, 79, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //   ],
+  // };
+
   const chartData = {
-    labels: userData[userTimeType].labels,
+    labels: userChart.labels,
     datasets: [
       {
         label: "All Users",
-        data: userData[userTimeType].all,
+        data: userChart.all,
         borderColor: "#01B763",
         backgroundColor: "rgba(1, 183, 99, 0.1)",
         tension: 0.4,
@@ -206,7 +313,7 @@ const Dashboard = () => {
       },
       {
         label: "Subscribed Users",
-        data: userData[userTimeType].subscribed,
+        data: userChart.subscribed,
         borderColor: "#1890ff",
         backgroundColor: "rgba(24, 144, 255, 0.1)",
         tension: 0.4,
@@ -214,7 +321,7 @@ const Dashboard = () => {
       },
       {
         label: "Not Subscribed Users",
-        data: userData[userTimeType].notSubscribed,
+        data: userChart.notSubscribed,
         borderColor: "#ff4d4f",
         backgroundColor: "rgba(255, 77, 79, 0.1)",
         tension: 0.4,
@@ -367,35 +474,35 @@ const Dashboard = () => {
     },
   ];
 
-  const invoiceChartData = {
-    labels: invoiceData[invoiceDuration].labels,
-    datasets: [
-      {
-        label: "Paid",
-        data: invoiceData[invoiceDuration].datasets.paid,
-        borderColor: "#01B763",
-        backgroundColor: "rgba(1, 183, 99, 0.1)",
-        tension: 0.4,
-        fill: false,
-      },
-      {
-        label: "Unpaid",
-        data: invoiceData[invoiceDuration].datasets.unpaid,
-        borderColor: "#1890ff",
-        backgroundColor: "rgba(24, 144, 255, 0.1)",
-        tension: 0.4,
-        fill: false,
-      },
-      {
-        label: "Overdue",
-        data: invoiceData[invoiceDuration].datasets.overdue,
-        borderColor: "#ff4d4f",
-        backgroundColor: "rgba(255, 77, 79, 0.1)",
-        tension: 0.4,
-        fill: false,
-      },
-    ],
-  };
+  // const invoiceChartData = {
+  //   labels: invoiceData[invoiceDuration].labels,
+  //   datasets: [
+  //     {
+  //       label: "Paid",
+  //       data: invoiceData[invoiceDuration].datasets.paid,
+  //       borderColor: "#01B763",
+  //       backgroundColor: "rgba(1, 183, 99, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //     {
+  //       label: "Unpaid",
+  //       data: invoiceData[invoiceDuration].datasets.unpaid,
+  //       borderColor: "#1890ff",
+  //       backgroundColor: "rgba(24, 144, 255, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //     {
+  //       label: "Overdue",
+  //       data: invoiceData[invoiceDuration].datasets.overdue,
+  //       borderColor: "#ff4d4f",
+  //       backgroundColor: "rgba(255, 77, 79, 0.1)",
+  //       tension: 0.4,
+  //       fill: false,
+  //     },
+  //   ],
+  // };
 
   return (
     <div
@@ -416,7 +523,7 @@ const Dashboard = () => {
               <div>
                 <div className="text-gray-500 text-sm">Total Customers</div>
                 <div className="text-2xl font-semibold text-gray-800">
-                  {dashboardData?.totalUsers || 0}
+                  {dashboardData?.userSummary?.totalUsers || 0}
                 </div>
               </div>
             </div>
@@ -450,7 +557,7 @@ const Dashboard = () => {
                   Subscribed Customers
                 </div>
                 <div className="text-2xl font-semibold text-gray-800">
-                  {dashboardData?.subscribedUsers || 1510}
+                  {dashboardData?.userSummary?.subscribeUsers || 0}
                 </div>
               </div>
             </div>
@@ -468,7 +575,7 @@ const Dashboard = () => {
                   Not Subscribed Customers
                 </div>
                 <div className="text-2xl font-semibold text-gray-800">
-                  {dashboardData?.notSubscribedUsers || 553}
+                  {dashboardData?.userSummary?.unsubscribedUsers || 0}
                 </div>
               </div>
             </div>
@@ -493,16 +600,23 @@ const Dashboard = () => {
                     <Option value="yearly">Yearly</Option>
                     <Option value="monthly">Monthly</Option>
                     <Option value="weekly">Weekly</Option>
-                    <Option value="daily">Daily</Option>
+                    <Option value="today">Today</Option>
                   </Select>
                 </div>
               </div>
             }
           >
             <div style={{ height: 300 }}>
-              <Line data={chartData} options={chartOptions} />
+              {/* <Line data={userChartData} options={chartOptions} /> */}
+              {chartData?.labels?.length > 0 ? (
+                <Line data={chartData} options={chartOptions} />
+              ) : (
+                <div className="text-center text-gray-500">
+                  No data available
+                </div>
+              )}
             </div>
-            {/* <Line data={chartData} options={chartOptions} /> */}
+            {/* <Line data={userChartData} options={chartOptions} /> */}
           </Card>
         </Col>
 
@@ -512,7 +626,7 @@ const Dashboard = () => {
             title={
               <div className="flex flex-wrap items-center justify-between gap-2 w-full p-2">
                 <span className="text-[#122751] text-[16px] sm:text-[16px] font-semibold">
-                  Invoice Status
+                  Tickets Status
                 </span>
               </div>
             }
@@ -520,23 +634,16 @@ const Dashboard = () => {
             <div style={{ height: 300 }}>
               <Doughnut
                 data={{
-                  labels: ["Paid", "Unpaid", "OverDue"],
+                  labels: ["Open", "Close"],
                   datasets: [
                     {
-                      data: dashboardData?.invoiceStatusPercentage
+                      data: dashboardData?.ticket
                         ? [
-                            parseFloat(
-                              dashboardData.invoiceStatusPercentage.Paid || 0
-                            ),
-                            parseFloat(
-                              dashboardData.invoiceStatusPercentage.Unpaid || 0
-                            ),
-                            parseFloat(
-                              dashboardData.invoiceStatusPercentage.OverDue || 0
-                            ),
+                            parseFloat(dashboardData?.ticket?.open || 0),
+                            parseFloat(dashboardData?.ticket?.close || 0),
                           ]
                         : [0, 0, 0],
-                      backgroundColor: ["#01B763", "#1890ff", "#ff4d4f"],
+                      backgroundColor: ["#01B763", "#ff4d4f"],
                       borderWidth: 1,
                     },
                   ],
@@ -595,7 +702,7 @@ const Dashboard = () => {
                     <Option value="yearly">Yearly</Option>
                     <Option value="monthly">Monthly</Option>
                     <Option value="weekly">Weekly</Option>
-                    <Option value="daily">Daily</Option>
+                    <Option value="today">Today</Option>
                   </Select>
                 </div>
               </div>

@@ -42,5 +42,6 @@ export const useQueryState = (query) => {
     error: query.error,
     isSuccess: query.isSuccess,
     data: query.data,
+    isFetching: query.isFetching
   };
 }; 
