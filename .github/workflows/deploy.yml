@@ -1,0 +1,65 @@
+name: Deploy to DigitalOcean (Main Repo)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Set SSH Host and Save SSH Key
+        run: |
+          echo "SSH_HOST=${{ secrets.SSH_HOST_MAIN }}" >> $GITHUB_ENV
+          echo "${{ secrets.SSH_KEY_MAIN }}" > private_key
+          chmod 600 private_key
+
+      - name: Deploy to DigitalOcean
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key_path: ./private_key
+          script: |
+            set -e
+
+            DEPLOY_PATH="/var/www/mint-invoice-admin-panel"
+
+            echo "🚀 Deploying to $DEPLOY_PATH"
+
+            mkdir -p $DEPLOY_PATH
+            cd $DEPLOY_PATH
+
+            if [ ! -d .git ]; then
+              git init  
+              git remote add origin git@github.com:LogicGo-WebDeveloper/mint-invoice-admin-panel.git
+            else
+              git remote set-url origin git@github.com:LogicGo-WebDeveloper/mint-invoice-admin-panel.git
+            fi
+
+            git fetch origin
+            git clean -fd
+            git checkout -B main origin/main
+
+            # git fetch origin
+            # git reset --hard origin/main
+
+
+            npm install --production
+
+            pm2 restart mint-invoice-admin-panel || pm2 start index.js --name "mint-invoice-admin-panel"
+
+            echo "✅ Deployment successful to development repo!"

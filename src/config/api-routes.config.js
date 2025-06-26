@@ -1,4 +1,4 @@
-export const DOMAIN = "http://159.65.146.101:8001";
+export const DOMAIN = "http://192.168.0.180:8001";
 export const ADMIN = "admin";
 export const USER = "api";
 export const VERSION_V1 = "v1";
@@ -31,4 +31,8 @@ export const ROUTE_PATH = {
   DASHBOARD: {
     GET_DASHBOARD: `${API_ADMIN}/dashboard`,
   },
+  SUPPORT_REQUEST: {
+    GET_ALL_TICKETS: `${API_ADMIN}/support-request`,
+    REPLY_TO_TICKET: (ticketId) => `${API_ADMIN}/support-request/${ticketId}/reply`,
+  }
 };

@@ -34,6 +34,8 @@ import { RxCross2, RxAvatar } from "react-icons/rx";
 import { MdAddBusiness } from "react-icons/md";
 import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
 import { GrUserAdmin } from "react-icons/gr";
+import { logout } from "../../store/slices/userSlice";
+
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -45,6 +47,7 @@ const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const handleResize = () => {
@@ -69,8 +72,8 @@ const Home = () => {
   ];
 
   const userMenuItems = [
-    { key: "1", icon: <UserOutlined />, label: "Profile" },
-    { key: "2", icon: <SettingOutlined />, label: "Settings" },
+    // { key: "1", icon: <UserOutlined />, label: "Profile" },
+    // { key: "2", icon: <SettingOutlined />, label: "Settings" },
     { key: "3", icon: <LogoutOutlined />, label: "Logout" },
   ];
 
@@ -81,10 +84,9 @@ const Home = () => {
 
   const handleUserMenuClick = ({ key }) => {
     if (key === "3") {
-      console.log("dsdsdssds");
       localStorage.removeItem("token");
-      // dispatch(setUser(null));
-      navigate(ROUTES.ADMIN.SIGNUP);
+      dispatch(logout());
+      navigate(ROUTES.ADMIN.LOGIN);
     }
   };
 

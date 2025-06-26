@@ -8,6 +8,7 @@ import { ROUTE_PATH } from "../../config/api-routes.config";
 import { QUERY_KEYS } from "../../config/query.const";
 import { Content } from "antd/es/layout/layout";
 import dayjs from "dayjs";
+import CommonError from "../../components/common/CommonError";
 
 const Admins = () => {
   const [searchText, setSearchText] = useState("");
@@ -76,25 +77,44 @@ const Admins = () => {
   return (
     <>
       {/* Search & Filter */}
-      <div className="flex p-6 gap-4">
-        <Input
-          placeholder="Search..."
-          prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
-          className="w-full md:max-w-sm"
-          onChange={handleSearchChange}
-          value={searchText}
-        />
+      <div className="p-6">
+        {/* Mobile Layout: Search + Per Page */}
+        <div className="flex gap-3 sm:hidden">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
 
-        {/* <Select
-          value={roleFilter}
-          className="w-full md:w-[130px]"
-          onChange={setRoleFilter}
-          options={[
-            { label: "All Roles", value: "all" },
-            { label: "Admin", value: "admin" },
-            { label: "Super Admin", value: "Super Admin" },
-          ]}
-        /> */}
+          <Select
+            value={pageSize}
+            onChange={(val) => {
+              setPageSize(val);
+              setCurrentPage(1);
+            }}
+            options={[
+              { label: "10 / page", value: 10 },
+              { label: "20 / page", value: 20 },
+              { label: "50 / page", value: 50 },
+              { label: "100 / page", value: 100 },
+            ]}
+            className="w-[120px]"
+            dropdownMatchSelectWidth={false}
+          />
+        </div>
+
+        {/* Desktop Layout: Search only */}
+        <div className="hidden sm:flex gap-4 mt-3 sm:mt-0">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full md:max-w-sm"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
+        </div>
       </div>
 
       {/* Table Content */}
@@ -105,9 +125,15 @@ const Admins = () => {
               <CommonSkeleton rows={5} />
             </div>
           ) : isError ? (
-            <div className="text-red-500">
-              Error: {error?.message || "Something went wrong."}
-            </div>
+            <CommonError
+              message={
+                error?.response?.data?.message ||
+                (error?.response?.status === 500
+                  ? "Something went wrong. Please try again later."
+                  : error?.message || "An error occurred.")
+              }
+              status={error?.response?.status}
+            />
           ) : (
             <>
               <>
@@ -118,11 +144,11 @@ const Admins = () => {
                   pagination={false}
                   scroll={
                     admins.length > 0
-                      ? { x: 1000, y: "calc(100vh - 300px)" }
+                      ? { x: 1000, y: "calc(90vh - 300px)" }
                       : {}
                   }
                 />
-
+                
                 <div className="flex flex-col md:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
                   {/* Total Admins */}
                   <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">

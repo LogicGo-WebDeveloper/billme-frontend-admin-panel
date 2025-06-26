@@ -15,11 +15,16 @@ export const QUERY_KEYS = {
   },
   INVOICE: {
     GET_ALL_INVOICES: "get-all-invoices",
-    GET_INVOICES_BY_USER: "get-invoices-by-user"
+    GET_INVOICES_BY_USER: "get-invoices-by-user",
+    RECENT_INVOICES: "recent-invoices",
   },
   DASHBOARD: {
     GET_DASHBOARD: "get-dashboard",
   },
+  SUPPORT_REQUEST: {
+    GET_ALL_TICKETS: "get-all-requests",
+    REPLY_TICKET: "reply-ticket",
+  }
 };
 
 export const QUERY_METHODS = {

@@ -87,7 +87,8 @@ body {
 .ant-input-outlined:focus,
 .ant-input-outlined-focused,
 .ant-input-outlined-active,
-.ant-input-outlined-active {
+.ant-input-outlined-active,
+.ant-input-affix-wrapper-focused {
   border-color: #01b763 !important;
   box-shadow: 0 0 0 2px rgba(1, 183, 99, 0.1) !important;
 }
@@ -163,6 +164,7 @@ body {
   padding: 12px !important;
   overflow-wrap: break-word !important;
   background-color: transparent !important;
+  text-align: center !important; 
 }
 
 /* Prevent empty table cell from creating height */

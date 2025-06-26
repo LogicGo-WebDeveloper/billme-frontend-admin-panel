@@ -1,11 +1,14 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../config/route.const";
 import { RxCross2 } from "react-icons/rx";
+import { useState } from "react";
+import CommonLoader from "../../components/common/CommonLoader";
 
 const InvoicePreview = () => {
   const [searchParams] = useSearchParams();
   const pdfUrl = searchParams.get("url");
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
     <div className="w-full h-screen bg-white flex flex-col">
@@ -20,15 +23,27 @@ const InvoicePreview = () => {
         </button>
       </div>
 
-      {/* PDF Viewer via Google Docs (CORS Safe) */}
-      <div className="flex-1 overflow-hidden">
+      {/* Loader + PDF Preview */}
+      <div className="flex-1 overflow-hidden relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-white">
+            <CommonLoader showText={false} />
+          </div>
+        )}
+
         {pdfUrl ? (
           <iframe
             src={`https://docs.google.com/gview?url=${encodeURIComponent(
               pdfUrl
             )}&embedded=true`}
             title="Invoice PDF Preview"
-            style={{ width: "100%", height: "100%", border: "none" }}
+            onLoad={() => setIsLoading(false)}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              visibility: isLoading ? "hidden" : "visible",
+            }}
           />
         ) : (
           <div className="text-center mt-10 text-red-500">Invalid PDF URL</div>

@@ -3,348 +3,218 @@ import {
   Row,
   Col,
   Card,
-  // Statistic,
   Select,
   Table,
-  // Tag,
   List,
   Input,
   Button,
   Space,
-  Modal,
   Avatar,
   Typography,
   Divider,
   Statistic,
   Pagination,
+  Tooltip,
 } from "antd";
 import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
-  ClockCircleOutlined,
-  // DollarOutlined,
-  SendOutlined,
-  UserOutlined,
   CustomerServiceOutlined,
+  UserOutlined,
   DollarOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
-// import { Line, Doughnut, Bar } from "react-chartjs-2";
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   ArcElement,
-//   BarElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
 import PrimaryButton from "../../components/common/primary.button";
 import StatusBadge from "../../components/common/commonBadge";
 import CommonTable from "../../components/CommonTable";
+import { useFetch, useMutate, useQueryState } from "../../hooks/useQuery";
+import { ROUTE_PATH } from "../../config/api-routes.config";
+import { QUERY_KEYS, QUERY_METHODS } from "../../config/query.const";
+import CommonSkeleton from "../../components/common/CommonSkeleton";
+import dayjs from "dayjs";
+import CommonModal from "../../components/common/commonModal";
+import { message as antdMessage } from "antd";
+import LoadingButton from "../../components/common/loading-button";
+import { Content } from "antd/es/layout/layout";
+import CommonError from "../../components/common/CommonError";
 
 const { TextArea } = Input;
 const { Title: TypographyTitle, Text } = Typography;
 const { Option } = Select;
 
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   ArcElement,
-//   BarElement,
-//   Title,
-//   Tooltip,
-//   Legend
-// );
-
 const SupportTickets = () => {
-  const [ticketTrendDuration, setTicketTrendDuration] = useState("monthly");
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [isTicketModalVisible, setIsTicketModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [messageApi, contextHolder] = antdMessage.useMessage();
+  const [replyLoading, setReplyLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchText, setSearchText] = useState("");
 
-  const totalTickets = 250;
-  const openTickets = 80;
-  const closedTickets = 170;
-  const highPriorityTickets = 25;
-
-  const handlePaginationChange = (page, pageSize) => {
-    setCurrentPage(page);
-    setPageSize(pageSize);
-    // Optionally fetch new data here if it's paginated server-side
+  const buildQueryURL = () => {
+    let url = `${ROUTE_PATH.SUPPORT_REQUEST.GET_ALL_TICKETS}?page=${currentPage}&limit=${pageSize}`;
+    if (statusFilter !== "all") {
+      url += `&status=${statusFilter}`;
+    }
+    if (searchText?.trim()) {
+      url += `&search=${encodeURIComponent(searchText.trim())}`;
+    }
+    return url;
   };
 
-  // const ticketTrendData = {
-  //   yearly: {
-  //     labels: ["2020", "2021", "2022", "2023", "2024"],
-  //     data: [80, 150, 180, 220, 250],
-  //   },
-  //   monthly: {
-  //     labels: [
-  //       "Jan",
-  //       "Feb",
-  //       "Mar",
-  //       "Apr",
-  //       "May",
-  //       "Jun",
-  //       "Jul",
-  //       "Aug",
-  //       "Sep",
-  //       "Oct",
-  //       "Nov",
-  //       "Dec",
-  //     ],
-  //     data: [15, 20, 18, 25, 22, 30, 28, 35, 32, 38, 40, 45],
-  //   },
-  //   weekly: {
-  //     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  //     data: [5, 8, 7, 10, 12, 15, 10],
-  //   },
-  //   daily: {
-  //     labels: ["8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM"],
-  //     data: [1, 2, 3, 2, 4, 3, 5],
-  //   },
-  // };
+  const query = useFetch(
+    [
+      QUERY_KEYS.SUPPORT_REQUEST.GET_ALL_TICKETS,
+      currentPage,
+      pageSize,
+      statusFilter,
+      searchText,
+    ],
+    buildQueryURL(),
+    { refetchOnWindowFocus: false }
+  );
 
-  // const chartData = {
-  //   labels: ticketTrendData[ticketTrendDuration].labels,
-  //   datasets: [
-  //     {
-  //       label: "Tickets Created",
-  //       data: ticketTrendData[ticketTrendDuration].data,
-  //       borderColor: "#01B763",
-  //       backgroundColor: "rgba(1, 183, 99, 0.1)",
-  //       tension: 0.4,
-  //       fill: true,
-  //     },
-  //   ],
-  // };
+  const { isLoading, isError, data, error } = useQueryState(query);
+  const tickets = (data?.data || []).map((ticket) => ({
+    key: ticket._id,
+    id: ticket._id,
+    subject: ticket.subject || "-",
+    customer: ticket.userId?.email || "-",
+    description: ticket.description || "-",
+    status:
+      ticket.status === "close"
+        ? "Closed"
+        : ticket.status === "open"
+        ? "Open"
+        : ticket.status,
+    messages: (ticket.messages || []).map((msg) => ({
+      sender:
+        msg.senderType === "admin"
+          ? "Admin"
+          : ticket.userId?.email || ticket.email,
+      message: msg.message,
+      time: dayjs(msg.timestamp).format("DD MMM YYYY, hh:mm A"),
+      isAdmin: msg.senderType === "admin",
+    })),
+  }));
 
-  // const chartOptions = {
-  //   responsive: true,
-  //   plugins: { legend: { position: "top" } },
-  //   scales: { y: { beginAtZero: true } },
-  // };
+  const totalTickets = data?.ticketsCount?.totalTicket || 0;
+  const openTickets = data?.ticketsCount?.openTicket || 0;
+  const closedTickets = data?.ticketsCount?.closedTicket || 0;
+  const paginatedTicketCount = data?.pagination?.totalCount || 0;
 
-  // const ticketStatusData = {
-  //   labels: ["Open", "Closed", "Pending", "Resolved"],
-  //   datasets: [
-  //     {
-  //       data: [30, 50, 10, 10],
-  //       backgroundColor: ["#1890ff", "#01B763", "#faad14", "#2db7f5"],
-  //     },
-  //   ],
-  // };
-
-  // const ticketPriorityData = {
-  //   labels: ["High", "Medium", "Low"],
-  //   datasets: [
-  //     {
-  //       label: "Number of Tickets",
-  //       data: [25, 60, 165],
-  //       backgroundColor: ["#ff4d4f", "#faad14", "#1890ff"],
-  //     },
-  //   ],
-  // };
-
-  const tickets = [
+  const { mutate: sendReplyMutation } = useMutate(
+    [QUERY_KEYS.SUPPORT_REQUEST.REPLY_TICKET, selectedTicket?.id],
+    QUERY_METHODS.POST,
+    selectedTicket
+      ? ROUTE_PATH.SUPPORT_REQUEST.REPLY_TO_TICKET(selectedTicket.id)
+      : "",
     {
-      key: "1",
-      id: "TKT001",
-      subject: "Payment gateway issue",
-      customer: "Alice Johnson",
-      status: "Open",
-      priority: "High",
-      assignedTo: "Support Team A",
-      lastUpdate: "2 hours ago",
-      messages: [
-        {
-          sender: "Alice Johnson",
-          message:
-            "I'm unable to process payments through the gateway. Getting an error message.",
-          time: "2 hours ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team A",
-          message:
-            "We're looking into this issue. Can you please share the error message you're seeing?",
-          time: "1 hour ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Alice Johnson",
-          message:
-            "The error says: 'Transaction failed. Please try again later.'",
-          time: "58 minutes ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team A",
-          message: "Thanks. We're checking logs with our payment provider.",
-          time: "45 minutes ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Alice Johnson",
-          message:
-            "The error says: 'Transaction failed. Please try again later.'",
-          time: "58 minutes ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team A",
-          message: "Thanks. We're checking logs with our payment provider.",
-          time: "45 minutes ago",
-          isAdmin: true,
-        },
-      ],
-    },
-    {
-      key: "2",
-      id: "TKT002",
-      subject: "Login not working",
-      customer: "Bob Smith",
-      status: "In Progress",
-      priority: "Medium",
-      assignedTo: "Support Team B",
-      lastUpdate: "1 hour ago",
-      messages: [
-        {
-          sender: "Bob Smith",
-          message:
-            "I can't log into my account. It keeps saying 'Invalid credentials'.",
-          time: "3 hours ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team B",
-          message: "Hi Bob, did you try resetting your password?",
-          time: "2 hours ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Bob Smith",
-          message: "Yes, but the reset email never came.",
-          time: "1 hour 30 minutes ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team B",
-          message:
-            "We've re-sent the email. Please check your spam folder too.",
-          time: "1 hour ago",
-          isAdmin: true,
-        },
-      ],
-    },
-    {
-      key: "3",
-      id: "TKT003",
-      subject: "Unable to upload documents",
-      customer: "Carlos Mendes",
-      status: "Pending",
-      priority: "Low",
-      assignedTo: "Support Team C",
-      lastUpdate: "30 minutes ago",
-      messages: [
-        {
-          sender: "Carlos Mendes",
-          message: "Upload keeps failing for PDF files above 5MB.",
-          time: "2 hours ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team C",
-          message:
-            "Carlos, our current limit is 5MB. We'll raise a request to increase it.",
-          time: "1 hour ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Carlos Mendes",
-          message: "Thanks. That will be helpful.",
-          time: "45 minutes ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Support Team C",
-          message: "We've escalated it. Will update you by tomorrow.",
-          time: "30 minutes ago",
-          isAdmin: true,
-        },
-      ],
-    },
-    {
-      key: "4",
-      id: "TKT004",
-      subject: "Billing discrepancy",
-      customer: "Diana Cruz",
-      status: "Closed",
-      priority: "High",
-      assignedTo: "Billing Team",
-      lastUpdate: "1 day ago",
-      messages: [
-        {
-          sender: "Diana Cruz",
-          message: "My invoice shows extra charges for last month.",
-          time: "2 days ago",
-          isAdmin: false,
-        },
-        {
-          sender: "Billing Team",
-          message: "Diana, we'll verify your billing and revert shortly.",
-          time: "1 day 22 hours ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Billing Team",
-          message:
-            "Confirmed, the charge was incorrect. A refund has been initiated.",
-          time: "1 day ago",
-          isAdmin: true,
-        },
-        {
-          sender: "Diana Cruz",
-          message: "Thank you for resolving it promptly.",
-          time: "23 hours ago",
-          isAdmin: false,
-        },
-      ],
-    },
-  ];
+      onSuccess: () => {
+        messageApi.success("Reply sent successfully!");
+        setReplyText("");
+        setReplyLoading(false);
+        setIsReplyModalVisible(false);
+        setIsTicketModalVisible(true);
+
+        query.refetch().then((newData) => {
+          // Find the updated ticket from the new data
+          const updatedTicket = (newData?.data?.data || []).find(
+            (t) => t._id === selectedTicket.id
+          );
+          if (updatedTicket) {
+            setSelectedTicket({
+              key: updatedTicket._id,
+              id: updatedTicket._id,
+              subject: updatedTicket.subject || "-",
+              customer:
+                updatedTicket.userId?.email || updatedTicket.email || "-",
+              description: updatedTicket.description || "-",
+              status:
+                updatedTicket.status === "close"
+                  ? "Closed"
+                  : updatedTicket.status === "open"
+                  ? "Open"
+                  : updatedTicket.status,
+              messages: (updatedTicket.messages || []).map((msg) => ({
+                sender:
+                  msg.senderType === "admin"
+                    ? "Admin"
+                    : updatedTicket.userId?.email || updatedTicket.email,
+                message: msg.message,
+                time: dayjs(msg.timestamp).format("DD MMM YYYY, hh:mm A"),
+                isAdmin: msg.senderType === "admin",
+              })),
+            });
+          }
+        });
+      },
+      onError: (error) => {
+        console.log("Reply error:", error);
+        setReplyLoading(false);
+        messageApi.error(
+          error?.response?.data?.message ||
+            "Failed to send reply. Please try again."
+        );
+      },
+    }
+  );
 
   const handleSendReply = () => {
-    if (replyText.trim()) {
-      console.log("Sending reply:", replyText);
-      setReplyText("");
-      setIsReplyModalVisible(false);
+    if (!replyText.trim()) {
+      messageApi.warning("Reply message cannot be empty.");
+      return;
     }
+    setReplyLoading(true);
+    sendReplyMutation({ message: replyText });
   };
 
   const ticketTableColumns = [
-    { title: "Ticket ID", dataIndex: "id", key: "id" },
-    { title: "Subject", dataIndex: "subject", key: "subject" },
-    { title: "Customer", dataIndex: "customer", key: "customer" },
+    {
+      title: "No",
+      dataIndex: "no",
+      key: "no",
+      width: 70,
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
+    },
+    {
+      title: "Email",
+      dataIndex: "customer",
+      key: "customer",
+      width: 200,
+      render: (text) => text,
+    },
+    {
+      title: "Subject",
+      dataIndex: "subject",
+      key: "subject",
+      width: 180,
+      render: (text) => text,
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      width: 300,
+      render: (text) => (
+        <Tooltip title={text}>
+          <span className="truncate block  text-center">{text}</span>
+        </Tooltip>
+      ),
+    },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 120,
       render: (status) => {
-        const badgeMap = {
-          Open: { bgColor: "#DBEAFE", textColor: "#1E3A8A" },
-          Closed: { bgColor: "#DCFCE7", textColor: "#166534" },
-          Pending: { bgColor: "#FEF3C7", textColor: "#92400E" },
-          Resolved: { bgColor: "#CFFAFE", textColor: "#155E75" },
-        };
-        const { bgColor, textColor } = badgeMap[status] || {};
+        const normalized = status?.toLowerCase();
+        const bgColor = normalized === "open" ? "#fee2e2" : "#d1d5db";
+        const textColor = normalized === "open" ? "#b91c1c" : "#111827";
+
         return (
           <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />
         );
@@ -353,8 +223,9 @@ const SupportTickets = () => {
     {
       title: "Action",
       key: "action",
+      width: 100,
       render: (_, record) => (
-        <div style={{ display: "flex", justifyContent: "center" }}>
+        <div className="flex justify-center">
           <PrimaryButton
             type="primary"
             onClick={() => {
@@ -370,176 +241,242 @@ const SupportTickets = () => {
     },
   ];
 
+  const handlePaginationChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
+
+  const handleCardClick = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const summaryCards = [
+    {
+      title: "Total Tickets",
+      value: totalTickets,
+      icon: <DollarOutlined className="text-xl" />,
+      bgColor: "#DBEAFE",
+      iconColor: "#1D4ED8",
+      status: "all",
+    },
+    {
+      title: "Open Tickets",
+      value: openTickets,
+      icon: <ExclamationCircleOutlined className="text-xl" />,
+      bgColor: "#D1FAE5",
+      iconColor: "#059669",
+      status: "open",
+    },
+    {
+      title: "Closed Tickets",
+      value: closedTickets,
+      icon: <CheckCircleOutlined className="text-xl" />,
+      bgColor: "#FEF3C7",
+      iconColor: "#F59E0B",
+      status: "close",
+    },
+  ];
+
   return (
-    <div style={{ padding: 24 }}>
-      <Row gutter={[16, 16]}>
-        {/* Commented out all statistics cards */}
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Total Tickets"
-              value={totalTickets}
-              valueStyle={{ color: "#01B763" }}
-              prefix={<DollarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Open Tickets"
-              value={openTickets}
-              valueStyle={{ color: "#1890ff" }}
-              prefix={<ExclamationCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={8}>
-          <Card>
-            <Statistic
-              title="Closed Tickets"
-              value={closedTickets}
-              valueStyle={{ color: "#01B763" }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        {/* <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="High Priority"
-              value={highPriorityTickets}
-              valueStyle={{ color: "#ff4d4f" }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col> */}
+    <>
+      {contextHolder}
 
-        {/* Commented out all charts */}
-        {/* <Col span={24} lg={16}>
-          <Card
-            title={
-              <>
-                <span>Ticket Trend</span>
-                <Select
-                  defaultValue={ticketTrendDuration}
-                  onChange={setTicketTrendDuration}
-                  style={{ float: "right", width: 120 }}
-                >
-                  <Option value="yearly">Yearly</Option>
-                  <Option value="monthly">Monthly</Option>
-                  <Option value="weekly">Weekly</Option>
-                  <Option value="daily">Daily</Option>
-                </Select>
-              </>
-            }
-          >
-            <Line data={chartData} options={chartOptions} />
-          </Card>
-        </Col>
-        <Col span={24} lg={8}>
-          <Card title="Ticket Status Summary">
-            <Doughnut
-              data={ticketStatusData}
-              options={{ plugins: { legend: { position: "bottom" } } }}
-            />
-          </Card>
-        </Col>
-        <Col span={24} lg={12}>
-          <Card title="Tickets by Priority">
-            <Bar data={ticketPriorityData} options={chartOptions} />
-          </Card>
-        </Col> */}
+      {/* Statistics Cards */}
+      <div style={{ padding: 24 }}>
+        <Row gutter={[16, 16]}>
+          {summaryCards.map((item, index) => (
+            <Col xs={24} sm={24} lg={8} key={index}>
+              <Card
+                loading={isLoading}
+                className={`rounded-2xl shadow-md border h-full cursor-pointer transition-all duration-200 ${
+                  statusFilter === item.status
+                    ? "border-blue-500 ring-2 ring-blue-200"
+                    : "border-gray-100"
+                }`}
+                onClick={() => handleCardClick(item.status)}
+              >
+                <div className="flex items-center h-[60px] gap-4">
+                  <div
+                    className="p-3 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      backgroundColor: item.bgColor,
+                      color: item.iconColor,
+                    }}
+                  >
+                    {item.icon}
+                  </div>
+                  <div className="flex flex-col justify-center flex-1 overflow-hidden">
+                    <div className="text-gray-500 text-sm leading-snug break-words max-w-full">
+                      {item.title}
+                    </div>
+                    <div className="text-2xl font-semibold text-gray-800">
+                      {item.value}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </div>
 
-        {/* Only the table remains visible */}
-        <Col span={24}>
-          <div className="overflow-x-auto">
-            <CommonTable
-              dataSource={tickets}
-              columns={ticketTableColumns}
-              rowKey="id"
-              pagination={false}
-              scroll={
-                tickets.length > 0 ? { x: 1000, y: "calc(100vh - 300px)" } : {}
-              }
-            />
+      {/* Search & Filter */}
+      <div className="p-6 pt-0 pb-4">
+        {/* Mobile Layout: Search + Per Page */}
+        <div className="flex gap-3 sm:hidden">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
+          <Select
+            value={pageSize}
+            onChange={(val) => {
+              setPageSize(val);
+              setCurrentPage(1);
+            }}
+            options={[
+              { label: "10 / page", value: 10 },
+              { label: "20 / page", value: 20 },
+              { label: "50 / page", value: 50 },
+              { label: "100 / page", value: 100 },
+            ]}
+            className="w-[120px]"
+            dropdownMatchSelectWidth={false}
+          />
+        </div>
+        {/* Desktop Layout: Search only */}
+        <div className="hidden sm:flex gap-4 mt-3 sm:mt-0">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full md:max-w-sm"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
+        </div>
+      </div>
 
-            <div className="flex flex-col lg:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
-              {/* Total Tickets Text */}
-              <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
-                Total Tickets: 120
-              </div>
-
-              {/* Pagination for Mobile */}
-              <div className="w-full sm:hidden flex justify-center">
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={120} // Replace with dynamic value when available
-                  onChange={handlePaginationChange}
-                  showSizeChanger={false}
-                  responsive
-                />
-              </div>
-
-              {/* Pagination for Desktop */}
-              <div className="hidden sm:flex justify-end w-full sm:w-auto">
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={120} // Replace with dynamic value when available
-                  onChange={handlePaginationChange}
-                  showSizeChanger={true}
-                  responsive
-                />
-              </div>
+      {/* Table Content */}
+      <Content className="mx-6 mb-6 bg-white rounded-b-sm max-h-[calc(90vh-800px)]">
+        <div>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full p-5 bg-white">
+              <CommonSkeleton rows={5} />
             </div>
-          </div>
-        </Col>
-      </Row>
+          ) : isError ? (
+            <CommonError
+              message={
+                error?.response?.data?.message ||
+                (error?.response?.status === 500
+                  ? "Something went wrong. Please try again later."
+                  : error?.message || "An error occurred.")
+              }
+              status={error?.response?.status}
+            />
+          ) : (
+            <>
+              <CommonTable
+                columns={ticketTableColumns}
+                dataSource={tickets}
+                rowKey="id"
+                pagination={false}
+                scroll={
+                  tickets.length > 0 ? { x: 1000, y: "calc(85vh - 300px)" } : {}
+                }
+              />
 
-      <Modal
-        title={`Ticket #${selectedTicket?.id} - ${selectedTicket?.subject}`}
-        open={isTicketModalVisible}
-        onCancel={() => setIsTicketModalVisible(false)}
-        width={800}
-        centered
-        footer={[
-          <div className="flex justify-end">
+              <div className="w-full flex justify-center sm:justify-end px-2 py-1 bg-white">
+                {/* Mobile - Centered without size changer */}
+                <div className="sm:hidden">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={paginatedTicketCount}
+                    onChange={handlePaginationChange}
+                    showSizeChanger={false}
+                    responsive
+                  />
+                </div>
+
+                {/* Desktop - Right-aligned with size changer */}
+                <div className="hidden sm:block">
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={paginatedTicketCount}
+                    onChange={handlePaginationChange}
+                    showSizeChanger={true}
+                    responsive
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </Content>
+
+      {/* Ticket Details Modal - Responsive */}
+      <CommonModal
+        isOpen={isTicketModalVisible}
+        onClose={() => setIsTicketModalVisible(false)}
+        width={Math.min(window.innerWidth - 16, 800)}
+        bodyStyle={{ padding: window.innerWidth < 600 ? 8 : 16 }}
+        title={
+          <div className="flex flex-col gap-1 max-w-full">
+            <Tooltip title={selectedTicket?.subject} placement="bottomLeft">
+              <span className="text-base font-semibold truncate max-w-full sm:max-w-[680px]">
+                {`Subject: ${selectedTicket?.subject}`}
+              </span>
+            </Tooltip>
+            <Tooltip title={selectedTicket?.description} placement="bottomLeft">
+              <span className="text-sm text-gray-500 truncate max-w-full sm:max-w-[680px]">
+                {`Description: ${selectedTicket?.description}`}
+              </span>
+            </Tooltip>
+          </div>
+        }
+        footer={
+          <div className="flex justify-end flex-wrap gap-2">
             <Button key="close" onClick={() => setIsTicketModalVisible(false)}>
               Close
             </Button>
-            ,
             <PrimaryButton
               key="reply"
               type="primary"
-              icon={<SendOutlined />}
               onClick={() => {
                 setIsTicketModalVisible(false);
                 setIsReplyModalVisible(true);
               }}
-              style={{ marginLeft: 8, width: 100, height: 40 }}
+              style={{ width: 90, height: 31, fontSize: 14 }}
             >
               Reply
             </PrimaryButton>
-            ,
-          </div>,
-        ]}
+          </div>
+        }
       >
-        <div style={{ marginBottom: 16 }}>
+        <div className="mb-4">
           <Text strong>Customer:</Text> {selectedTicket?.customer}
-          <Divider />
         </div>
         <div
+          className="border rounded-md overflow-y-auto"
           style={{
-            maxHeight: "400px",
-            overflowY: "auto",
-            padding: "0 16px",
-            border: "1px solid #f0f0f0",
-            borderRadius: "4px",
+            maxHeight: window.innerWidth < 600 ? "250px" : "400px",
+            padding: window.innerWidth < 600 ? "0 4px" : "0 12px",
+            borderColor: "#f0f0f0",
           }}
         >
-          <TypographyTitle level={5}>Conversation</TypographyTitle>
+          <TypographyTitle level={5} className="!mb-2 !mt-2 sm:!mt-0">
+            Conversation
+          </TypographyTitle>
           <List
             itemLayout="horizontal"
             dataSource={selectedTicket?.messages || []}
@@ -561,40 +498,59 @@ const SupportTickets = () => {
                     />
                   }
                   title={
-                    <Space>
+                    <Space direction="vertical" size={0}>
                       <Text strong>{item.sender}</Text>
-                      <Text type="secondary">{item.time}</Text>
+                      <Text type="secondary" className="text-xs">
+                        {item.time}
+                      </Text>
                     </Space>
                   }
-                  description={item.message}
+                  description={
+                    <div className="whitespace-pre-wrap break-words max-w-full">
+                      {item.message}
+                    </div>
+                  }
                 />
               </List.Item>
             )}
           />
         </div>
-      </Modal>
+      </CommonModal>
 
       {/* Reply Modal */}
-      <Modal
-        title={`Reply to Ticket ${selectedTicket?.id}`}
-        open={isReplyModalVisible}
-        onCancel={() => setIsReplyModalVisible(false)}
+      <CommonModal
+        isOpen={isReplyModalVisible}
+        onClose={() => {
+          setIsReplyModalVisible(false);
+          setIsTicketModalVisible(true);
+        }}
+        title={`Reply to Ticket : ${selectedTicket?.id}`}
         footer={[
-          <Button key="cancel" onClick={() => setIsReplyModalVisible(false)}>
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsReplyModalVisible(false);
+              setIsTicketModalVisible(true);
+            }}
+          >
             Cancel
           </Button>,
-          <Button
+          <PrimaryButton
             key="send"
-            type="primary"
-            icon={<SendOutlined />}
+            {...(replyLoading ? { disabled: true } : {})}
             onClick={handleSendReply}
+            style={{ marginLeft: 8, width: 110, height: 31, fontSize: 14 }}
           >
-            Send Reply
-          </Button>,
+            {replyLoading ? <LoadingButton size="small" /> : "Send Reply"}
+          </PrimaryButton>,
         ]}
       >
         <div style={{ marginBottom: 16 }}>
-          <Text strong>Subject: {selectedTicket?.subject}</Text>
+          <Tooltip title={selectedTicket?.subject} placement="bottomLeft">
+            <Text className="truncate block max-w-full sm:max-w-[680px]">
+              <strong>Subject:</strong> {selectedTicket?.subject}
+            </Text>
+          </Tooltip>
           <Divider style={{ margin: "12px 0" }} />
           <TextArea
             rows={4}
@@ -603,8 +559,8 @@ const SupportTickets = () => {
             placeholder="Type your reply here..."
           />
         </div>
-      </Modal>
-    </div>
+      </CommonModal>
+    </>
   );
 };
 

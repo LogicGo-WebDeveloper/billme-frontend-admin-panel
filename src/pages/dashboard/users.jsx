@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Select, Pagination, Spin } from "antd";
+import { Input, Select, Pagination, Empty } from "antd";
 import CommonTable from "../../components/CommonTable";
 import CommonSkeleton from "../../components/common/CommonSkeleton";
 import { SearchOutlined } from "@ant-design/icons";
@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import PrimaryButton from "../../components/common/primary.button";
 import CommonModal from "../../components/common/commonModal";
 import { RxCross2 } from "react-icons/rx";
+import CommonError from "../../components/common/CommonError";
 
 const Users = () => {
   const [searchText, setSearchText] = useState("");
@@ -23,58 +24,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
-
-  const demoInvoices = [
-    {
-      invoiceNumber: "INV-001",
-      invoiceStatus: "Paid",
-      total: "$100",
-      issueDate: "2024-12-01",
-      dueDate: "2025-01-01",
-    },
-    {
-      invoiceNumber: "INV-002",
-      invoiceStatus: "Pending",
-      total: "$250",
-      issueDate: "2025-01-15",
-      dueDate: "2025-02-15",
-    },
-    {
-      invoiceNumber: "INV-003",
-      invoiceStatus: "Overdue",
-      total: "$180",
-      issueDate: "2025-02-10",
-      dueDate: "2025-03-10",
-    },
-    {
-      invoiceNumber: "INV-004",
-      invoiceStatus: "Paid",
-      total: "$75",
-      issueDate: "2025-02-28",
-      dueDate: "2025-03-28",
-    },
-    {
-      invoiceNumber: "INV-005",
-      invoiceStatus: "Pending",
-      total: "$300",
-      issueDate: "2025-03-15",
-      dueDate: "2025-04-15",
-    },
-    {
-      invoiceNumber: "INV-006",
-      invoiceStatus: "Paid",
-      total: "$450",
-      issueDate: "2025-04-01",
-      dueDate: "2025-05-01",
-    },
-    {
-      invoiceNumber: "INV-007",
-      invoiceStatus: "Overdue",
-      total: "$90",
-      issueDate: "2025-04-20",
-      dueDate: "2025-05-20",
-    },
-  ];
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   const buildQueryURL = () => {
     const base = `${ROUTE_PATH.ADMINS_USERS.GET_USERS}?page=${currentPage}&limit=${pageSize}`;
@@ -117,7 +67,6 @@ const Users = () => {
   );
   const { data: invoiceData, isLoading: invoiceLoading } =
     useQueryState(invoiceQuery);
-  console.log("invoice data", invoiceData?.data);
   const userInvoices = invoiceData?.data || [];
 
   const columns = [
@@ -198,32 +147,77 @@ const Users = () => {
   };
 
   const handleViewUser = (user) => {
-    console.log("View user:", user);
     setSelectedUser(user);
     setIsModalOpen(true);
   };
 
   return (
     <>
-      <div className="flex p-6 gap-4">
-        <Input
-          placeholder="Search..."
-          prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
-          className="w-full md:max-w-sm"
-          onChange={handleSearchChange}
-          value={searchText}
-        />
+      <div className="px-6 pt-6 pb-0 sm:py-6 space-y-3">
+        {/* Search input - full width on mobile only */}
+        <div className="block sm:hidden">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
+        </div>
 
-        <Select
-          value={subscriptionFilter}
-          className="w-full md:w-[130px]"
-          onChange={handleFilterChange}
-          options={[
-            { label: "All Users", value: "all" },
-            { label: "Subscribed", value: "subscribed" },
-            { label: "Not Subscribed", value: "not_subscribed" },
-          ]}
-        />
+        {/* Filter + Page Size - side by side on mobile only */}
+        <div className="flex gap-3 sm:hidden">
+          {/* Subscription Filter */}
+          <Select
+            value={subscriptionFilter}  
+            onChange={handleFilterChange}
+            options={[
+              { label: "All Users", value: "all" },
+              { label: "Subscribed", value: "subscribed" },
+              { label: "Not Subscribed", value: "not_subscribed" },
+            ]}
+            className="w-1/2"
+          />
+
+          {/* Page Size Selector */}
+          <Select
+            value={pageSize}
+            onChange={(val) => {
+              setPageSize(val);
+              setCurrentPage(1);
+            }}
+            options={[
+              { label: "10 / page", value: 10 },
+              { label: "20 / page", value: 20 },
+              { label: "50 / page", value: 50 },
+              { label: "100 / page", value: 100 },
+            ]}
+            className="w-1/2"
+            dropdownMatchSelectWidth={false}
+          />
+        </div>
+
+        {/* Desktop layout (unchanged) */}
+        <div className="hidden sm:flex gap-4">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
+            className="w-full md:max-w-sm"
+            onChange={handleSearchChange}
+            value={searchText}
+          />
+
+          <Select
+            value={subscriptionFilter}
+            className="w-full md:w-[130px]"
+            onChange={handleFilterChange}
+            options={[
+              { label: "All Users", value: "all" },
+              { label: "Subscribed", value: "subscribed" },
+              { label: "Not Subscribed", value: "not_subscribed" },
+            ]}
+          />
+        </div>
       </div>
 
       <Content className="mx-6 mb-6 mt-0 bg-white rounded-b-sm max-h-[calc(100vh-800px)]">
@@ -237,9 +231,15 @@ const Users = () => {
               {/* <CommonLoader  /> */}
             </div>
           ) : isError ? (
-            <div className="text-red-500">
-              Error: {error?.message || "Something went wrong."}
-            </div>
+            <CommonError
+              message={
+                error?.response?.data?.message ||
+                (error?.response?.status === 500
+                  ? "Something went wrong. Please try again later."
+                  : error?.message || "An error occurred.")
+              }
+              status={error?.response?.status}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -250,17 +250,12 @@ const Users = () => {
                   pagination={false}
                   scroll={
                     users.length > 0
-                      ? { x: 1000, y: "calc(100vh - 300px)" }
+                      ? { x: 1000, y: "calc(90vh - 300px)" }
                       : {}
                   }
                 />
 
                 <div className="flex flex-col lg:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
-                  {/* Total Users Text */}
-                  {/* <div className="text-sm text-[#122751] font-medium text-center w-auto px-2 py-1.5 border border-[#d9d9d9] rounded mt-2  sm:mt-0 ">
-                    Total Users: {totalUsers}
-                  </div> */}
-
                   <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
                     Total Users: {totalUsers}
                   </div>
@@ -302,30 +297,40 @@ const Users = () => {
           setPreviewUrl(null);
         }}
         title={null}
-        width={previewUrl ? 1000 : 820} 
+        width={previewUrl ? 1000 : 820}
       >
         {/* If PDF is open, show iframe preview */}
         {previewUrl ? (
           <div className="flex flex-col h-[80vh]">
-          {/* Modal Header (always present) */}
-          <div className="flex justify-between items-center mb-3 flex-shrink-0">
-            <h2 className="text-[#122751] text-lg font-semibold">Invoice Preview</h2>
-            <RxCross2
-              onClick={() => setPreviewUrl(null)}
-              className="text-2xl text-[#122751]] hover:bg-[#f0f4ff] cursor-pointer"
-            />
+            {/* Modal Header (always present) */}
+            <div className="flex justify-between items-center mb-3 flex-shrink-0">
+              <h2 className="text-[#122751] text-lg font-semibold">
+                Invoice Preview
+              </h2>
+              <RxCross2
+                onClick={() => setPreviewUrl(null)}
+                className="text-2xl text-[#122751]] hover:bg-[#f0f4ff] cursor-pointer"
+              />
+            </div>
+
+            {/* Loader + PDF Preview */}
+            <div className="flex-1 overflow-hidden rounded-lg relative">
+              {isPdfLoading && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 bg-white">
+                  <CommonLoader showText={false} />
+                </div>
+              )}
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                  previewUrl
+                )}&embedded=true`}
+                title="Invoice PDF"
+                className="w-full h-full"
+                style={{ border: "none", visibility: isPdfLoading ? "hidden" : "visible" }}
+                onLoad={() => setIsPdfLoading(false)}
+              />
+            </div>
           </div>
-      
-          {/* Scrollable PDF viewer */}
-          <div className="flex-1 overflow-hidden rounded-lg">
-            <iframe
-              src={`https://docs.google.com/gview?url=${encodeURIComponent(previewUrl)}&embedded=true`}
-              title="Invoice PDF"
-              className="w-full h-full"
-              style={{ border: "none" }}
-            />
-          </div>
-        </div>
         ) : (
           <>
             {/* Header Section */}
@@ -371,13 +376,30 @@ const Users = () => {
 
             {/* Invoice Cards */}
             <div className="max-h-[600px] overflow-y-auto space-y-3 sm:space-y-4 pr-1 sm:pr-2">
-              {userInvoices
-                .filter((invoice) =>
+              {(() => {
+                const filteredInvoices = userInvoices.filter((invoice) =>
                   invoice.invoiceNumber
                     .toLowerCase()
                     .includes(searchKeyword?.toLowerCase() || "")
-                )
-                .map((invoice, idx) => (
+                );
+
+                if (invoiceLoading) {
+                  return (
+                    <div className="flex justify-center items-center h-40">
+                      <CommonLoader showText={false} />
+                    </div>
+                  );
+                }
+
+                if (!filteredInvoices.length) {
+                  return (
+                    <div className="flex justify-center items-center h-40">
+                      <Empty description="No Invoices Found" />
+                    </div>
+                  );
+                }
+
+                return filteredInvoices.map((invoice, idx) => (
                   <div
                     key={idx}
                     className="group relative border border-gray-200 rounded-lg sm:rounded-xl bg-gradient-to-tr from-white to-[#f9fbff] hover:from-[#f0f4ff] transition-all duration-300 shadow-sm hover:shadow-lg px-3 py-4 sm:px-5 sm:py-4"
@@ -402,7 +424,8 @@ const Users = () => {
 
                       <button
                         onClick={() => {
-                          setPreviewUrl(invoice.templateUrl); // ✅ OPEN PREVIEW
+                          setPreviewUrl(invoice.templateUrl);
+                          setIsPdfLoading(true);
                         }}
                         className="text-[12px] sm:text-sm font-medium hover:underline cursor-pointer text-[#122751] transition-colors duration-200"
                       >
@@ -441,7 +464,8 @@ const Users = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                ));
+              })()}
             </div>
           </>
         )}

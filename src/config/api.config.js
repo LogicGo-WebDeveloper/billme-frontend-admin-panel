@@ -32,10 +32,20 @@ api.interceptors.response.use(
             // Handle specific error status codes
             switch (error.response.status) {
                 case 401:
-                    // Handle unauthorized access
-                    //   localStorage.removeItem('token');
-                    //   window.location.href = '/login';
-                    console.error('Unauthorized access - redirecting to login');
+                    // Auth pages ke paths
+                    const AUTH_PATHS = [
+                        '/login',
+                        '/signup',
+                        '/verify-otp',
+                        '/forget-password',
+                        '/change-password',
+                        'verification-success'
+                    ];
+                    const currentPath = window.location.pathname;
+                    if (!AUTH_PATHS.includes(currentPath)) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/login';
+                    }
                     break;
                 case 403:
                     // Handle forbidden access

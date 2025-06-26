@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import { Content } from "antd/es/layout/layout";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../config/route.const";
+import CommonError from "../../components/common/CommonError";
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -41,6 +42,10 @@ const Invoices = () => {
       url += `&endDate=${dateRange[1].format("YYYY-MM-DD")}`;
     }
 
+    if (searchText?.trim()) {
+      url += `&search=${searchText.trim()}`;
+    }
+
     return url;
   };
 
@@ -52,6 +57,7 @@ const Invoices = () => {
       subscriptionFilter,
       invoiceStatusFilter,
       dateRange,
+      searchText,
     ],
     buildQueryURL(),
     { refetchOnWindowFocus: false }
@@ -151,54 +157,57 @@ const Invoices = () => {
 
   return (
     <>
-      <div className="flex flex-wrap gap-4 p-6">
-        {/* Search Input */}
+      <div className="flex flex-col gap-4 p-6 md:flex-row md:flex-wrap">
+        {/* Search Input - Full width on mobile, max width on desktop */}
         <Input
           placeholder="Search..."
           prefix={<SearchOutlined className="text-[#6b7280] mr-1" />}
-          className=" md:max-w-sm"
+          className="w-full md:max-w-sm"
           onChange={handleSearchChange}
           value={searchText}
         />
 
-        {/* Subscription Filter */}
-        <Select
-          placeholder="Subscription"
-          className=" md:w-[160px]"
-          onChange={(value) => {
-            setSubscriptionFilter(value);
-            setCurrentPage(1);
-          }}
-          options={[
-            { label: "All Users", value: "all" },
-            { label: "Subscribed", value: "true" },
-            { label: "Not Subscribed", value: "false" },
-          ]}
-          value={subscriptionFilter}
-        />
+        {/* Group: Subscription + Invoice Status (side by side on mobile) */}
+        <div className="flex gap-4 w-full md:w-auto">
+          {/* Subscription Filter */}
+          <Select
+            placeholder="Subscription"
+            className="w-full md:w-[160px]"
+            onChange={(value) => {
+              setSubscriptionFilter(value);
+              setCurrentPage(1);
+            }}
+            options={[
+              { label: "All Users", value: "all" },
+              { label: "Subscribed", value: "true" },
+              { label: "Not Subscribed", value: "false" },
+            ]}
+            value={subscriptionFilter}
+          />
 
-        {/* Invoice Status Filter */}
-        <Select
-          placeholder="Invoice Status"
-          className=" md:w-[160px]"
-          onChange={(value) => {
-            setInvoiceStatusFilter(value);
-            setCurrentPage(1);
-          }}
-          options={[
-            { label: "All Statuses", value: "all" },
-            { label: "Paid", value: "Paid" },
-            { label: "Unpaid", value: "Unpaid" },
-            { label: "Draft", value: "Draft" },
-            { label: "OverDue", value: "OverDue" },
-            { label: "Cancelled", value: "Cancel" },
-          ]}
-          value={invoiceStatusFilter}
-        />
+          {/* Invoice Status Filter */}
+          <Select
+            placeholder="Invoice Status"
+            className="w-full md:w-[160px]"
+            onChange={(value) => {
+              setInvoiceStatusFilter(value);
+              setCurrentPage(1);
+            }}
+            options={[
+              { label: "All Statuses", value: "all" },
+              { label: "Paid", value: "Paid" },
+              { label: "Unpaid", value: "Unpaid" },
+              { label: "Draft", value: "Draft" },
+              { label: "OverDue", value: "OverDue" },
+              { label: "Cancelled", value: "Cancel" },
+            ]}
+            value={invoiceStatusFilter}
+          />
+        </div>
 
-        {/* Date Range Picker */}
+        {/* Date Range Picker - full width on mobile */}
         <RangePicker
-          className=" md:w-[250px]"
+          className="w-full md:w-[250px]"
           onChange={handleDateRangeChange}
           value={dateRange}
         />
@@ -208,12 +217,18 @@ const Invoices = () => {
         <div className="">
           {isLoading ? (
             <div className="flex justify-center items-center h-full p-5 bg-white">
-              <CommonSkeleton rows={6} />
+              <CommonSkeleton rows={8} />
             </div>
           ) : isError ? (
-            <div className="text-red-500">
-              Error: {error?.message || "Something went wrong."}
-            </div>
+            <CommonError
+              message={
+                error?.response?.data?.message ||
+                (error?.response?.status === 500
+                  ? "Something went wrong. Please try again later."
+                  : error?.message || "An error occurred.")
+              }
+              status={error?.response?.status}
+            />
           ) : (
             <>
               <div className="overflow-x-auto">
@@ -224,7 +239,7 @@ const Invoices = () => {
                   pagination={false}
                   scroll={
                     invoices.length > 0
-                      ? { x: 1000, y: "calc(100vh - 300px)" }
+                      ? { x: 1000, y: "calc(90vh - 300px)" }
                       : {}
                   }
                 />
@@ -263,28 +278,6 @@ const Invoices = () => {
           )}
         </div>
       </Content>
-      <Modal
-        open={previewVisible}
-        onCancel={() => setPreviewVisible(false)}
-        footer={null}
-        width={900}
-        style={{ padding: "0px" }}
-      >
-        {/* <iframe
-          src={
-            "https://guardianshot.blr1.cdn.digitaloceanspaces.com/billme/684bc81b6cd3cf2f803e0f1c/14963bc0-ea1a-416c-ab3e-86edf4f5dd02.pdf"
-          }
-          title="Invoice Preview"
-          style={{ width: "100%", height: "80vh", border: "none" }}
-        /> */}
-        <iframe
-          src={`https://docs.google.com/gview?url=${encodeURIComponent(
-            previewUrl
-          )}&embedded=true`}
-          title="Invoice Preview"
-          style={{ width: "100%", height: "80vh", border: "none" }}
-        />
-      </Modal>
     </>
   );
 };
