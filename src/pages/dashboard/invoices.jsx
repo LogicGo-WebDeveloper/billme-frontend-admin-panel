@@ -9,10 +9,13 @@ import { useFetch, useQueryState } from "../../hooks/useQuery";
 import { ROUTE_PATH } from "../../config/api-routes.config";
 import { QUERY_KEYS } from "../../config/query.const";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { Content } from "antd/es/layout/layout";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../config/route.const";
 import CommonError from "../../components/common/CommonError";
+
+dayjs.extend(utc);
 
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -111,7 +114,7 @@ const Invoices = () => {
       dataIndex: "createdAt",
       key: "createdAt",
       width: 200,
-      render: (date) => dayjs(date).format("DD MMM YYYY"),
+      render: (date) => dayjs.utc(date).format("DD MMM YYYY"),
     },
     {
       title: "Action",
@@ -210,6 +213,9 @@ const Invoices = () => {
           className="w-full md:w-[250px]"
           onChange={handleDateRangeChange}
           value={dateRange}
+          getPopupContainer={() => document.body}
+          mode={["date", "date"]}
+          dropdownClassName="mobile-range-picker"
         />
       </div>
 
@@ -239,7 +245,7 @@ const Invoices = () => {
                   pagination={false}
                   scroll={
                     invoices.length > 0
-                      ? { x: 1000, y: "calc(90vh - 300px)" }
+                      ? { x: 1000, y: "calc(85vh - 300px)" }
                       : {}
                   }
                 />

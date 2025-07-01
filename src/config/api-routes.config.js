@@ -1,4 +1,4 @@
-export const DOMAIN = "http://192.168.0.180:8001";
+export const DOMAIN = "https://api.mint-invoice.com";
 export const ADMIN = "admin";
 export const USER = "api";
 export const VERSION_V1 = "v1";
@@ -23,6 +23,7 @@ export const ROUTE_PATH = {
   ADMINS_USERS: {
     GET_USERS: `${API_ADMIN}/admin-user/app-users`,
     GET_ADMINS: `${API_ADMIN}/admin-user/all-admin-users`,
+    UPDATE_ADMIN_STATUS: `${API_ADMIN}/admin-user/update-status-approved-or-rejected`,
   },
   INVOICE: {
     GET_ALL_INVOICES: `${API_ADMIN}/invoices/list`,

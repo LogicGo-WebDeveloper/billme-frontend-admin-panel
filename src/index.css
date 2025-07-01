@@ -368,3 +368,16 @@ body {
 .rpv-core__inner-pages {
   background-color: #313131 !important;
 } */
+@media (max-width: 768px) {
+  .mobile-range-picker .ant-picker-panels {
+    flex-direction: column !important;
+  }
+
+  .mobile-range-picker .ant-picker-panel {
+    width: 100% !important;
+  }
+}
+
+.custom-mobile-drawer .ant-drawer-header {
+  padding: 16px 12px 16px 16px !important; 
+}

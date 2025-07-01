@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   ADMINS_USERS: {
     GET_ALL_USERS: "get-all-users",
     GET_ALL_ADMIN: "get-all-admin",
+    UPDATE_ADMIN_STATUS: "update-admin-status",
   },
   INVOICE: {
     GET_ALL_INVOICES: "get-all-invoices",

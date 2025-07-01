@@ -193,7 +193,7 @@ const Users = () => {
               { label: "100 / page", value: 100 },
             ]}
             className="w-1/2"
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
           />
         </div>
 
@@ -220,10 +220,8 @@ const Users = () => {
         </div>
       </div>
 
-      <Content className="mx-6 mb-6 mt-0 bg-white rounded-b-sm max-h-[calc(100vh-800px)]">
+      <div className="mx-6 mb-6 mt-0 bg-white rounded-b-sm">
         <div className="">
-          {/* Header */}
-
           {/* Table */}
           {isLoading ? (
             <div className="flex justify-center items-center h-full p-5 bg-white">
@@ -288,7 +286,7 @@ const Users = () => {
             </>
           )}
         </div>
-      </Content>
+      </div>
 
       <CommonModal
         isOpen={isModalOpen}

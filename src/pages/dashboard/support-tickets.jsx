@@ -350,7 +350,7 @@ const SupportTickets = () => {
               { label: "100 / page", value: 100 },
             ]}
             className="w-[120px]"
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
           />
         </div>
         {/* Desktop Layout: Search only */}
@@ -366,7 +366,7 @@ const SupportTickets = () => {
       </div>
 
       {/* Table Content */}
-      <Content className="mx-6 mb-6 bg-white rounded-b-sm max-h-[calc(90vh-800px)]">
+      <div className="mx-6 mb-6 mt-0 rounded-b-sm bg-white">
         <div>
           {isLoading ? (
             <div className="flex justify-center items-center h-full p-5 bg-white">
@@ -422,7 +422,7 @@ const SupportTickets = () => {
             </>
           )}
         </div>
-      </Content>
+      </div>
 
       {/* Ticket Details Modal - Responsive */}
       <CommonModal

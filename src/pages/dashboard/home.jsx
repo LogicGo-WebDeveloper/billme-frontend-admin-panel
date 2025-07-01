@@ -36,7 +36,6 @@ import { LiaFileInvoiceDollarSolid } from "react-icons/lia";
 import { GrUserAdmin } from "react-icons/gr";
 import { logout } from "../../store/slices/userSlice";
 
-
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
 
@@ -61,14 +60,24 @@ const Home = () => {
   const menuItems = [
     { key: "1", icon: <LineChartOutlined />, label: "Dashboard", path: "/" },
     { key: "2", icon: <UserOutlined />, label: "Users", path: "/users" },
-    { key: "3", icon: <GrUserAdmin size={14} />, label: "Admins", path: "/admins" },
+    {
+      key: "3",
+      icon: <GrUserAdmin size={14} />,
+      label: "Admins",
+      path: "/admins",
+    },
     {
       key: "4",
       icon: <BiSupport />,
       label: "Tickets",
       path: "/support-tickets",
     },
-    { key: "5", icon: <LiaFileInvoiceDollarSolid />, label: "Invoices", path: "/invoices" },
+    {
+      key: "5",
+      icon: <LiaFileInvoiceDollarSolid />,
+      label: "Invoices",
+      path: "/invoices",
+    },
   ];
 
   const userMenuItems = [
@@ -94,6 +103,7 @@ const Home = () => {
     <Layout hasSider>
       {isMobile && (
         <Drawer
+          className="custom-mobile-drawer"
           title={
             <div
               style={{
@@ -123,7 +133,11 @@ const Home = () => {
           closable={false}
           onClose={() => setDrawerVisible(false)}
           open={drawerVisible}
-          bodyStyle={{ padding: 0 }}
+          styles={{
+            body: {
+              padding: 0,
+            },
+          }}
           width={200}
         >
           <Menu
@@ -228,7 +242,10 @@ const Home = () => {
                   className="bg-gray-200 text-black"
                 />
                 <div className="flex flex-col leading-tight items-center justify-center">
-                  <Text style={{ lineHeight: "1.2"}} className="text-sm/6 font-medium text-gray-800 capitalize">
+                  <Text
+                    style={{ lineHeight: "1.2" }}
+                    className="text-sm/6 font-medium text-gray-800 capitalize"
+                  >
                     {user.name || "—"}
                   </Text>
                   <Text className="text-xs text-gray-500 capitalize">

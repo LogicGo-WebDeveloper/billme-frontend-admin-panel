@@ -3,24 +3,11 @@ import {
   Row,
   Col,
   Card,
-  Statistic,
-  Button,
-  List,
-  Typography,
-  Space,
   Select,
-  Table,
-  Divider,
-  Skeleton,
 } from "antd";
 import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  DollarOutlined,
-  ShoppingCartOutlined,
   UserOutlined,
   FileTextOutlined,
-  EyeOutlined,
 } from "@ant-design/icons";
 import { Line, Doughnut, Bar } from "react-chartjs-2";
 import {
@@ -46,10 +33,6 @@ import { ROUTE_PATH } from "../../config/api-routes.config";
 import CommonSkeleton from "../../components/common/CommonSkeleton";
 import CommonLoader from "../../components/common/CommonLoader";
 import dayjs from "dayjs";
-import {
-  RiMoneyDollarCircleFill,
-  RiMoneyDollarCircleLine,
-} from "react-icons/ri";
 import { MdAttachMoney } from "react-icons/md";
 import CommonModal from "../../components/common/commonModal";
 import { RxCross2 } from "react-icons/rx";
@@ -361,7 +344,7 @@ const Dashboard = () => {
       <div
         style={{
           padding: 24,
-          minHeight: "100vh",
+          Height: "100vh",
           display: "flex",
           flexDirection: "column",
         }}
@@ -537,7 +520,7 @@ const Dashboard = () => {
                   dataSource={invoices}
                   columns={invoiceTableColumns}
                   pagination={false}
-                  rowKey="id"
+                  rowKey={(record) => record.templateUrl}
                   scroll={
                     invoices.length > 0
                       ? { x: 1000, y: "calc(75vh - 300px)" }

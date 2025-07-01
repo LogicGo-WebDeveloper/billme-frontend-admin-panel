@@ -3,7 +3,7 @@ export const ROUTES = {
         LOGIN: '/login',
         SIGNUP: '/signup',
         VERIFY_OTP: '/verify-otp',
-        FORGET_PASSWORD: '/forget-password',
+        FORGET_PASSWORD: '/forgot-password',
         CHANGE_PASSWORD: '/change-password',
         VERIFICATION_SUCCESS: '/verification-success'
     },

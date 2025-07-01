@@ -15,6 +15,7 @@ import Invoices from "./pages/dashboard/invoices.jsx";
 import InvoicePreview from "./pages/dashboard/invoicePreview.jsx";
 import AuthorizePages from "./components/authorizePages.jsx";
 import UnAuthorizePages from "./components/unAuthorizePages.jsx";
+import ErrorPage from './pages/dashboard/error-page.jsx';
 
 function App() {
   return (
@@ -22,12 +23,21 @@ function App() {
       <Routes>
         {/* Auth Routes */}
         {/* <Route element={<UnAuthorizePages />}> */}
-          <Route path={ROUTES.ADMIN.LOGIN} element={<Login />} />
-          <Route path={ROUTES.ADMIN.SIGNUP} element={<Signup />} />
-          <Route path={ROUTES.ADMIN.VERIFY_OTP} element={<VerifyOtp />} />
-          <Route path={ROUTES.ADMIN.FORGET_PASSWORD} element={<ForgetPassword />} />
-          <Route path={ROUTES.ADMIN.CHANGE_PASSWORD} element={<ChangePassword />} />
-          <Route path={ROUTES.ADMIN.VERIFICATION_SUCCESS} element={<VerificationSuccess />} />
+        <Route path={ROUTES.ADMIN.LOGIN} element={<Login />} />
+        <Route path={ROUTES.ADMIN.SIGNUP} element={<Signup />} />
+        <Route path={ROUTES.ADMIN.VERIFY_OTP} element={<VerifyOtp />} />
+        <Route
+          path={ROUTES.ADMIN.FORGET_PASSWORD}
+          element={<ForgetPassword />}
+        />
+        <Route
+          path={ROUTES.ADMIN.CHANGE_PASSWORD}
+          element={<ChangePassword />}
+        />
+        <Route
+          path={ROUTES.ADMIN.VERIFICATION_SUCCESS}
+          element={<VerificationSuccess />}
+        />
         {/* </Route> */}
 
         {/* Dashboard Routes inside layout */}
@@ -48,6 +58,30 @@ function App() {
             element={<InvoicePreview />}
           />
         </Route>
+
+        {/* Error Routes */}
+        <Route
+          path={ROUTES.ERROR.PAGE_NOT_FOUND}
+          element={
+            <ErrorPage
+              status="404"
+              title="404"
+              subTitle="Sorry, the page you visited does not exist."
+              buttonText="Back Home"
+            />
+          }
+        />
+        <Route
+          path={ROUTES.ERROR.SERVER_ERROR}
+          element={
+            <ErrorPage
+              status="500"
+              title="500"
+              subTitle="Sorry, something went wrong."
+              buttonText="Back Home"
+            />
+          }
+        />
       </Routes>
     </div>
   );
