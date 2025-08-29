@@ -14,6 +14,10 @@ import { Content } from "antd/es/layout/layout";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../config/route.const";
 import CommonError from "../../components/common/CommonError";
+import { countryOptions } from "../../data/country-options";
+import CommonModal from "../../components/common/commonModal";
+import { RxCross2 } from "react-icons/rx";
+import CommonLoader from "../../components/common/CommonLoader";
 
 dayjs.extend(utc);
 
@@ -29,7 +33,10 @@ const Invoices = () => {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [countryFilter, setCountryFilter] = useState("all");
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   const buildQueryURL = () => {
     let url = `${ROUTE_PATH.INVOICE.GET_ALL_INVOICES}?page=${currentPage}&limit=${pageSize}`;
@@ -49,6 +56,10 @@ const Invoices = () => {
       url += `&search=${searchText.trim()}`;
     }
 
+    if (countryFilter !== "all") {
+      url += `&country=${countryFilter}`;
+    }
+
     return url;
   };
 
@@ -61,6 +72,7 @@ const Invoices = () => {
       invoiceStatusFilter,
       dateRange,
       searchText,
+      countryFilter,
     ],
     buildQueryURL(),
     { refetchOnWindowFocus: false }
@@ -113,7 +125,7 @@ const Invoices = () => {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      width: 200,
+      width: 150,
       render: (date) => dayjs.utc(date).format("DD MMM YYYY"),
     },
     {
@@ -123,14 +135,12 @@ const Invoices = () => {
       render: (_, record) => (
         <PrimaryButton
           type="primary"
-          // icon={<EyeOutlined />}
           onClick={() => {
-            setPreviewUrl(record?.InvoiceUrl);
-            navigate(
-              `${ROUTES.DASHBOARD.INVOICE_PREVIEW}?url=${encodeURIComponent(
-                record.InvoiceUrl ? record.InvoiceUrl : record?.templateUrl
-              )}`
+            setPreviewUrl(
+              record?.invoiceUrl ? record?.invoiceUrl : record?.templateUrl
             );
+            setIsModalOpen(true);
+            setIsPdfLoading(true);
           }}
           style={{ width: 80, height: 32, fontSize: "12px" }}
         >
@@ -171,7 +181,8 @@ const Invoices = () => {
         />
 
         {/* Group: Subscription + Invoice Status (side by side on mobile) */}
-        <div className="flex gap-4 w-full md:w-auto">
+        {/* Group: Subscription + Invoice Status + Country (responsive) */}
+        <div className="flex flex-col gap-3 w-full md:flex-row md:gap-4 md:w-auto">
           {/* Subscription Filter */}
           <Select
             placeholder="Subscription"
@@ -205,6 +216,18 @@ const Invoices = () => {
               { label: "Cancelled", value: "Cancel" },
             ]}
             value={invoiceStatusFilter}
+          />
+
+          {/* Country Filter */}
+          <Select
+            value={countryFilter}
+            onChange={(val) => {
+              setCountryFilter(val);
+              setCurrentPage(1);
+            }}
+            options={countryOptions}
+            className="w-full md:w-[160px]"
+            showSearch
           />
         </div>
 
@@ -284,6 +307,54 @@ const Invoices = () => {
           )}
         </div>
       </Content>
+      {/* Invoice Preview Modal */}
+      <CommonModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPreviewUrl("");
+        }}
+        title={null}
+        width={1000}
+      >
+        {previewUrl && (
+          <div className="flex flex-col h-[80vh]">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-3 flex-shrink-0">
+              <h2 className="text-[#122751] text-lg font-semibold">
+                Invoice Preview
+              </h2>
+              <RxCross2
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setPreviewUrl("");
+                }}
+                className="text-2xl text-[#122751] hover:bg-[#f0f4ff] cursor-pointer"
+              />
+            </div>
+            {/* Loader + PDF Preview */}
+            <div className="flex-1 overflow-hidden rounded-lg relative">
+              {isPdfLoading && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 bg-white">
+                  <CommonLoader showText={false} />
+                </div>
+              )}
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                  previewUrl
+                )}&embedded=true`}
+                title="Invoice PDF"
+                className="w-full h-full"
+                style={{
+                  border: "none",
+                  visibility: isPdfLoading ? "hidden" : "visible",
+                }}
+                onLoad={() => setIsPdfLoading(false)}
+              />
+            </div>
+          </div>
+        )}
+      </CommonModal>
     </>
   );
 };

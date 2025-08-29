@@ -35,5 +35,6 @@ export const ROUTE_PATH = {
   SUPPORT_REQUEST: {
     GET_ALL_TICKETS: `${API_ADMIN}/support-request`,
     REPLY_TO_TICKET: (ticketId) => `${API_ADMIN}/support-request/${ticketId}/reply`,
+    UPDATE_TICKET_STATUS: (requestId) => `${API_ADMIN}/support-request/${requestId}/status`,
   }
 };

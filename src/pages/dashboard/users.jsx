@@ -14,6 +14,7 @@ import PrimaryButton from "../../components/common/primary.button";
 import CommonModal from "../../components/common/commonModal";
 import { RxCross2 } from "react-icons/rx";
 import CommonError from "../../components/common/CommonError";
+import { countryOptions } from "../../data/country-options";
 
 const Users = () => {
   const [searchText, setSearchText] = useState("");
@@ -25,6 +26,7 @@ const Users = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [countryFilter, setCountryFilter] = useState("all");
 
   const buildQueryURL = () => {
     const base = `${ROUTE_PATH.ADMINS_USERS.GET_USERS}?page=${currentPage}&limit=${pageSize}`;
@@ -35,8 +37,12 @@ const Users = () => {
         : subscriptionFilter === "not_subscribed"
         ? `&isSubscribe=false`
         : "";
+    const country =
+      countryFilter !== "all"
+        ? `&country=${encodeURIComponent(countryFilter)}`
+        : "";
 
-    return `${base}${search}${subFilter}`;
+    return `${base}${search}${subFilter}${country}`;
   };
 
   const query = useFetch(
@@ -46,6 +52,7 @@ const Users = () => {
       pageSize,
       searchText,
       subscriptionFilter,
+      countryFilter,
     ],
     buildQueryURL(),
     { refetchOnWindowFocus: false }
@@ -55,6 +62,7 @@ const Users = () => {
 
   const users = data?.data?.data || [];
   const totalUsers = data?.data?.totalItems || 0;
+  const totalInvoices = data?.data?.totalInvoiceCounts || 0;
 
   const invoiceQuery = useFetch(
     [QUERY_KEYS.INVOICE.GET_INVOICES_BY_USER, selectedUser?._id],
@@ -88,7 +96,7 @@ const Users = () => {
       title: "Subscription",
       dataIndex: "isSubscribe",
       key: "isSubscribe",
-      width: 160,
+      width: 150,
       render: (isSubscribe) => (
         <StatusBadge
           label={isSubscribe ? "Subscribed" : "Not Subscribed"}
@@ -98,10 +106,24 @@ const Users = () => {
       ),
     },
     {
+      title: "Country",
+      dataIndex: "country",
+      key: "country",
+      width: 200,
+      render: (country) => country || "-",
+    },
+    {
+      title: "Total Invoices",
+      dataIndex: "totalInvoices",
+      key: "totalInvoices",
+      width: 120,
+      render: (totalInvoices) => totalInvoices || "-",
+    },
+    {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
-      width: 200,
+      width: 150,
       render: (createdAt) =>
         createdAt ? dayjs(createdAt).format("DD MMM YYYY") : "-",
     },
@@ -169,7 +191,7 @@ const Users = () => {
         <div className="flex gap-3 sm:hidden">
           {/* Subscription Filter */}
           <Select
-            value={subscriptionFilter}  
+            value={subscriptionFilter}
             onChange={handleFilterChange}
             options={[
               { label: "All Users", value: "all" },
@@ -195,6 +217,16 @@ const Users = () => {
             className="w-1/2"
             popupMatchSelectWidth={false}
           />
+          <Select
+            value={countryFilter}
+            onChange={(val) => {
+              setCountryFilter(val);
+              setCurrentPage(1);
+            }}
+            options={countryOptions}
+            className="w-1/2"
+            showSearch
+          />
         </div>
 
         {/* Desktop layout (unchanged) */}
@@ -216,6 +248,18 @@ const Users = () => {
               { label: "Subscribed", value: "subscribed" },
               { label: "Not Subscribed", value: "not_subscribed" },
             ]}
+          />
+
+          <Select
+            value={countryFilter}
+            className="w-full md:w-[160px]"
+            onChange={(val) => {
+              setCountryFilter(val);
+              setCurrentPage(1);
+            }}
+            options={countryOptions}
+            showSearch
+            // optionFilterProp="label"
           />
         </div>
       </div>
@@ -247,15 +291,18 @@ const Users = () => {
                   rowKey="_id"
                   pagination={false}
                   scroll={
-                    users.length > 0
-                      ? { x: 1000, y: "calc(90vh - 300px)" }
-                      : {}
+                    users.length > 0 ? { x: 1000, y: "calc(90vh - 300px)" } : {}
                   }
                 />
 
                 <div className="flex flex-col lg:flex-row sm:justify-between sm:items-center items-center px-2 py-1 bg-white text-center w-full">
-                  <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
-                    Total Users: {totalUsers}
+                  <div className="flex gap-2">
+                    <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
+                      Total Users: {totalUsers}
+                    </div>
+                    <div className="text-xs sm:text-sm text-[#122751] font-medium text-center sm:w-auto px-2 py-1 border border-[#d9d9d9] rounded mt-2 lg:mt-0">
+                      Total Invoices: {totalInvoices}
+                    </div>
                   </div>
 
                   {/* Pagination for small screens (centered, no size changer) */}
@@ -324,7 +371,10 @@ const Users = () => {
                 )}&embedded=true`}
                 title="Invoice PDF"
                 className="w-full h-full"
-                style={{ border: "none", visibility: isPdfLoading ? "hidden" : "visible" }}
+                style={{
+                  border: "none",
+                  visibility: isPdfLoading ? "hidden" : "visible",
+                }}
                 onLoad={() => setIsPdfLoading(false)}
               />
             </div>
@@ -422,7 +472,7 @@ const Users = () => {
 
                       <button
                         onClick={() => {
-                          setPreviewUrl(invoice.templateUrl);
+                          setPreviewUrl(invoice?.templateUrl);
                           setIsPdfLoading(true);
                         }}
                         className="text-[12px] sm:text-sm font-medium hover:underline cursor-pointer text-[#122751] transition-colors duration-200"

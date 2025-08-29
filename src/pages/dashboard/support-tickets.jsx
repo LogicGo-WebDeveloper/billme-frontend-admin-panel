@@ -37,6 +37,7 @@ import { message as antdMessage } from "antd";
 import LoadingButton from "../../components/common/loading-button";
 import { Content } from "antd/es/layout/layout";
 import CommonError from "../../components/common/CommonError";
+import SecondryButton from "../../components/common/secondry.button";
 
 const { TextArea } = Input;
 const { Title: TypographyTitle, Text } = Typography;
@@ -53,6 +54,9 @@ const SupportTickets = () => {
   const [replyLoading, setReplyLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const buildQueryURL = () => {
     let url = `${ROUTE_PATH.SUPPORT_REQUEST.GET_ALL_TICKETS}?page=${currentPage}&limit=${pageSize}`;
@@ -172,6 +176,49 @@ const SupportTickets = () => {
     sendReplyMutation({ message: replyText });
   };
 
+  // Mutation for updating ticket status
+  const { mutate: updateStatusMutation, isPending: isStatusPending } = useMutate(
+    [QUERY_KEYS.SUPPORT_REQUEST.UPDATE_TICKET_STATUS, selectedTicket?.id],
+    QUERY_METHODS.PATCH,
+    selectedTicket ? ROUTE_PATH.SUPPORT_REQUEST.UPDATE_TICKET_STATUS(selectedTicket.id) : "",
+    {
+      onSuccess: (data) => {
+        messageApi.success(data.message || "Status updated successfully");
+        setIsStatusModalOpen(false);
+        setStatusLoading(false);
+        setSelectedStatus("");
+        query.refetch();
+      },
+      onError: (error) => {
+        setStatusLoading(false);
+        messageApi.error(
+          error?.response?.data?.message || "Failed to update status"
+        );
+      },
+    }
+  );
+
+  // Function to open status modal
+  const openStatusModal = (ticket, status) => {
+    setSelectedTicket(ticket);
+    setSelectedStatus(status);
+    setIsStatusModalOpen(true);
+  };
+
+  // Function to confirm status change
+  const confirmStatusChange = () => {
+    if (selectedTicket && selectedStatus) {
+      setStatusLoading(true);
+      updateStatusMutation({ status: selectedStatus });
+    }
+  };
+
+  // Function to close modal
+  const closeStatusModal = () => {
+    setIsStatusModalOpen(false);
+    setSelectedStatus("");
+  };
+
   const ticketTableColumns = [
     {
       title: "No",
@@ -210,14 +257,46 @@ const SupportTickets = () => {
       dataIndex: "status",
       key: "status",
       width: 120,
-      render: (status) => {
+      render: (status, record) => {
         const normalized = status?.toLowerCase();
-        const bgColor = normalized === "open" ? "#fee2e2" : "#d1d5db";
-        const textColor = normalized === "open" ? "#b91c1c" : "#111827";
+        const bgColor = normalized === "open" ? "#d1fae5" : "#fee2e2";
+        const textColor = normalized === "open" ? "#065f46" : "#991b1b";
 
-        return (
-          <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />
-        );
+        if (normalized === "open") {
+          return (
+            <div
+              style={{
+                backgroundColor: bgColor,
+                color: textColor,
+                padding: "2px 2px",
+                borderRadius: "6px",
+                display: "inline-block",
+                minWidth: "90px",
+              }}
+            >
+              <Select
+                value={status}
+                onChange={(value) => openStatusModal(record, value)}
+                style={{
+                  width: "100%",
+                  backgroundColor: "transparent",
+                  border: "none",
+                  color: textColor,
+                  fontWeight: "500",
+                }}
+                size="small"
+                disabled={isStatusPending}
+                options={[
+                  { label: "Open", value: "open" },
+                  { label: "Closed", value: "close" },
+                ]}
+                variant="borderless"
+              />
+            </div>
+          );
+        }
+        // Closed: show badge only
+        return <StatusBadge label={status} bgColor={bgColor} textColor={textColor} />;
       },
     },
     {
@@ -558,6 +637,36 @@ const SupportTickets = () => {
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Type your reply here..."
           />
+        </div>
+      </CommonModal>
+
+      {/* Status Modal */}
+      <CommonModal
+        isOpen={isStatusModalOpen}
+        onClose={closeStatusModal}
+        width={400}
+        footer={
+          <div className="flex flex-col sm:flex-row justify-end gap-3">
+            <SecondryButton
+              onClick={closeStatusModal}
+              style={{ width: "100%", height: "40px" }}
+              className="sm:w-[120px]"
+            >
+              Cancel
+            </SecondryButton>
+            <PrimaryButton
+              onClick={confirmStatusChange}
+              loading={statusLoading}
+              style={{ width: "100%", height: "40px" }}
+              className="sm:w-[120px]"
+            >
+              Confirm
+            </PrimaryButton>
+          </div>
+        }
+      >
+        <div className="py-6 text-center text-base text-gray-800 font-medium">
+          Are you sure you want to close this ticket?
         </div>
       </CommonModal>
     </>
